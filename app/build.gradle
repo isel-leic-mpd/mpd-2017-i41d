@@ -12,6 +12,8 @@ repositories {
 }
 
 dependencies {
+    compile project(':aula02-weather-api')
+
     // Use JUnit test framework
     testCompile 'junit:junit:4.12'
 }
