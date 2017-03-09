@@ -40,7 +40,7 @@ public class WeatherWebApi {
 
     private static final String WEATHER_TOKEN;
     private static final String WEATHER_HOST = "http://api.worldweatheronline.com";
-    private static final String WEATHER_PAST = "/free/v2/past-weather.ashx";
+    private static final String WEATHER_PAST = "/premium/v1/past-weather.ashx";
     private static final String WEATHER_PAST_ARGS =
             "?q=%s&date=%s&enddate=%s&tp=24&format=csv&key=%s";
 
