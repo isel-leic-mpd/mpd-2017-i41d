@@ -1,6 +1,8 @@
 import util.FileRequest;
 import util.HttpRequest;
 import util.IRequest;
+import util.NaiveQueries;
+import util.WeatherPredicate;
 import weather.WeatherWebApi;
 import weather.model.WeatherInfo;
 
@@ -17,14 +19,56 @@ public class App {
         IRequest req = new FileRequest(); // new FileRequest();
         WeatherWebApi api = new WeatherWebApi(req);
         Iterable<WeatherInfo> infos = api.pastWeather(41.15, -8.6167, LocalDate.of(2017,02,01),LocalDate.of(2017,02,28));
-        infos.forEach(out::println);
 
-        api.search("Porto").forEach(out::println);
+        //infos.forEach(out::println);
+        // api.search("Porto").forEach(out::println);
 
-        /* <=>
-        for (WeatherInfo line: data) {
-            out.println(line);
-        }
+        /* v1
+        NaiveQueries.filterCloudy(infos).forEach(out::println);;
+        NaiveQueries.filterRainy(infos).forEach(out::println);;
         */
+        // NaiveQueries.filterDesc(infos, "cloud").forEach(out::println);;
+
+        /*
+        NaiveQueries.filter(infos, new WeatherDryDays()).forEach(out::println);
+        NaiveQueries.filter(infos, new WeatherByDescription("cloud")).forEach(out::println);
+
+        WeatherPredicate above18degrees = new WeatherPredicate() {
+            @Override
+            public boolean test(WeatherInfo item) {
+                return item.getTempC() >= 18;
+            }
+        };
+
+        NaiveQueries.filter(infos, above18degrees).forEach(out::println);
+        */
+
+        // NaiveQueries.filter(infos, new WeatherDryDays()).forEach(out::println);
+        NaiveQueries.filter(infos, info -> info.getPrecipMM() == 0).forEach(out::println);
+        NaiveQueries.filter(infos, info -> info.getTempC() < 13).forEach(out::println);
+
     }
 }
+
+class WeatherByDescription implements WeatherPredicate {
+
+    final String query;
+
+    public WeatherByDescription(String query) {
+        this.query = query;
+    }
+
+    @Override
+    public boolean test(WeatherInfo item) {
+        return item.getDescription().toLowerCase().contains(query);
+    }
+}
+
+class WeatherDryDays implements WeatherPredicate {
+
+    @Override
+    public boolean test(WeatherInfo item) {
+        return item.getPrecipMM() == 0;
+    }
+}
+
