@@ -58,4 +58,14 @@ public class Location {
                 Double.parseDouble(data[3]),
                 Double.parseDouble(data[4]));
     }
+
+    @Override
+    public String toString() {
+        return "Location{" +
+                "country='" + country + '\'' +
+                ", region='" + region + '\'' +
+                ", latitude=" + latitude +
+                ", longitude=" + longitude +
+                '}';
+    }
 }

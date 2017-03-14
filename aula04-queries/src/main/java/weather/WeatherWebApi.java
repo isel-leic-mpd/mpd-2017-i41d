@@ -43,6 +43,8 @@ public class WeatherWebApi {
     private static final String WEATHER_PAST = "/premium/v1/past-weather.ashx";
     private static final String WEATHER_PAST_ARGS =
             "?q=%s&date=%s&enddate=%s&tp=24&format=csv&key=%s";
+    private static final String WEATHER_SEARCH="/premium/v1/search.ashx?query=%s";
+    private static final String WEATHER_SEARCH_ARGS="&format=tab&key=%s";
 
     static {
         try {
@@ -72,7 +74,15 @@ public class WeatherWebApi {
      */
 
     public Iterable<Location> search(String query) {
-        return null;
+        String url=WEATHER_HOST + WEATHER_SEARCH + WEATHER_SEARCH_ARGS;
+        url = String.format(url, query, WEATHER_TOKEN);
+        List<Location> locations= new ArrayList<>();
+        Iterator<String> iteratorString= req.getContent(url).iterator();
+        while(iteratorString.hasNext()) {
+            String line = iteratorString.next();
+            if(!line.startsWith("#")) locations.add(Location.valueOf(line));
+        }
+        return locations;
     }
 
     /**
