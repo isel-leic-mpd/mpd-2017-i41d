@@ -2,3 +2,4 @@
 include 'app'
 include 'aula01'
 include 'aula02-weather-api'
+include 'aula04-queries'
