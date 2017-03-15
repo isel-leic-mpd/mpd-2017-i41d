@@ -16,8 +16,8 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" scope="TEST" name="Gradle: junit:junit:4.12" level="project" />
     <orderEntry type="library" scope="TEST" name="Gradle: org.hamcrest:hamcrest-core:1.3" level="project" />
-    <orderEntry type="module" module-name="aula04-queries" scope="PROVIDED" />
-    <orderEntry type="module" module-name="aula04-queries" scope="RUNTIME" />
-    <orderEntry type="module" module-name="aula04-queries" scope="TEST" />
+    <orderEntry type="module" module-name="aula05-generic-methods" scope="PROVIDED" />
+    <orderEntry type="module" module-name="aula05-generic-methods" scope="RUNTIME" />
+    <orderEntry type="module" module-name="aula05-generic-methods" scope="TEST" />
   </component>
 </module>
