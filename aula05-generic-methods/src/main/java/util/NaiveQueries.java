@@ -79,5 +79,11 @@ public class NaiveQueries {
         return res;
     }
 
-
+    public static int count(Iterable<WeatherInfo> data) {
+        int size = 0;
+        for (WeatherInfo item: data) {
+            size++;
+        }
+        return size;
+    }
 }
