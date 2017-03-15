@@ -1,3 +1,4 @@
+import util.EagerQueries;
 import util.FileRequest;
 import util.HttpRequest;
 import util.IRequest;
@@ -7,6 +8,7 @@ import weather.WeatherWebApi;
 import weather.model.WeatherInfo;
 
 import java.time.LocalDate;
+import java.util.Comparator;
 
 import static java.lang.System.out;
 
@@ -16,36 +18,30 @@ import static java.lang.System.out;
 public class App {
 
     public static void main(String[] args) {
+        /*
+         * Arrange
+         */
         IRequest req = new FileRequest(); // new FileRequest();
         WeatherWebApi api = new WeatherWebApi(req);
+        /*
+         * Act
+         */
         Iterable<WeatherInfo> infos = api.pastWeather(41.15, -8.6167, LocalDate.of(2017,02,01),LocalDate.of(2017,02,28));
-
-        //infos.forEach(out::println);
-        // api.search("Porto").forEach(out::println);
-
-        /* v1
-        NaiveQueries.filterCloudy(infos).forEach(out::println);;
-        NaiveQueries.filterRainy(infos).forEach(out::println);;
-        */
-        // NaiveQueries.filterDesc(infos, "cloud").forEach(out::println);;
+        // infos = NaiveQueries.filter(infos, info -> info.getTempC() < 13);
+        infos = EagerQueries.<WeatherInfo>filter(infos, info -> info.getTempC() < 13);
+        infos = EagerQueries.filter(infos, info -> info.getTempC() < 13);
+        /*
+         * Assert
+         */
+        infos.forEach(out::println);
 
         /*
-        NaiveQueries.filter(infos, new WeatherDryDays()).forEach(out::println);
-        NaiveQueries.filter(infos, new WeatherByDescription("cloud")).forEach(out::println);
+         * Exemplos de expressões lambdas aplicadas a expressões do tipo
+         * interface funcional.
+         */
+        Comparator<String> cmp1 =  (item1, item2) -> item1.length() - item2.length();
+        Comparator<String> cmp2 =  (item1, item2) -> { return 0; };
 
-        WeatherPredicate above18degrees = new WeatherPredicate() {
-            @Override
-            public boolean test(WeatherInfo item) {
-                return item.getTempC() >= 18;
-            }
-        };
-
-        NaiveQueries.filter(infos, above18degrees).forEach(out::println);
-        */
-
-        // NaiveQueries.filter(infos, new WeatherDryDays()).forEach(out::println);
-        NaiveQueries.filter(infos, info -> info.getPrecipMM() == 0).forEach(out::println);
-        NaiveQueries.filter(infos, info -> info.getTempC() < 13).forEach(out::println);
 
     }
 }
