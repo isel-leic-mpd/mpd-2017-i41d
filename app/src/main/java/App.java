@@ -21,7 +21,7 @@ public class App {
         /*
          * Arrange
          */
-        IRequest req = new FileRequest(); // new FileRequest();
+        IRequest req = new HttpRequest(); // new FileRequest();
         WeatherWebApi api = new WeatherWebApi(req);
         /*
          * Act

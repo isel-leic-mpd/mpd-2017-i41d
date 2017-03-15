@@ -17,37 +17,51 @@
 
 package util;
 
+import jdk.internal.util.xml.impl.Input;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.UncheckedIOException;
-import java.util.ArrayList;
 import java.util.Iterator;
 
 /**
  * @author Miguel Gamboa
- *         created on 08-03-2017
+ *         created on 15-03-2017
  */
-public class FileRequest implements IRequest{
-    @Override
-    public Iterable<String> getContent(String path) {
-        String[] parts = path.split("/");
-        path = parts[parts.length-1]
-                .replace('?', '-')
-                .replace('&', '-')
-                .replace('=', '-')
-                .replace(',', '-')
-                .substring(0,68);
+public class IteratorFromReader implements Iterator<String> {
+    final BufferedReader reader;
+    final InputStream in;
+    private String nextLine;
+
+    public IteratorFromReader(InputStream in) {
+        this.in = in;
+        this.reader = new BufferedReader(new InputStreamReader(in));
+        this.nextLine = moveNext();
+    }
+
+    private String moveNext() {
         try {
-            InputStream in = ClassLoader.getSystemResource(path).openStream();
-            /*
-             * Consumir o Inputstream e adicionar dados ao res
-             */
-            Iterator<String> iter = new IteratorFromReader(in);
-            return () -> iter;
+            String line = reader.readLine();
+            if(line == null) {
+                in.close();
+                reader.close();
+            }
+            return line;
         } catch (IOException e) {
-            throw new UncheckedIOException(e);
+            throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public boolean hasNext() {
+        return nextLine != null;
+    }
+
+    @Override
+    public String next() {
+        String curr = nextLine;
+        nextLine = moveNext();
+        return curr;
     }
 }

@@ -24,6 +24,7 @@ import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -33,20 +34,15 @@ import java.util.List;
 public class HttpRequest implements IRequest {
     @Override
     public Iterable<String> getContent(String path) {
-        List<String> res = new ArrayList<>();
-        try (InputStream in = new URL(path).openStream()) {
+        try {
+            InputStream in = new URL(path).openStream();
             /*
              * Consumir o Inputstream e adicionar dados ao res
              */
-            try(BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    res.add(line);
-                }
-            }
+            Iterator<String> iter = new IteratorFromReader(in);
+            return () -> iter;
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
-        return res;
     }
 }
