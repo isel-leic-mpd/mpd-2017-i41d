@@ -15,8 +15,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package util;
+package util.queries;
 
+import util.WeatherPredicate;
 import weather.model.WeatherInfo;
 
 import java.util.ArrayList;

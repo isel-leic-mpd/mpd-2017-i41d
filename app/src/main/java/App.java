@@ -1,8 +1,6 @@
-import util.EagerQueries;
-import util.FileRequest;
+import util.queries.EagerQueries;
 import util.HttpRequest;
 import util.IRequest;
-import util.NaiveQueries;
 import util.WeatherPredicate;
 import weather.WeatherWebApi;
 import weather.model.WeatherInfo;

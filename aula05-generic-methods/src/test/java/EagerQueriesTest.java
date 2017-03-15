@@ -15,18 +15,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import junit.framework.Assert;
 import org.junit.Test;
-import util.EagerQueries;
 import util.FileRequest;
-import util.IRequest;
 import weather.WeatherWebApi;
 import weather.model.WeatherInfo;
 
 import java.time.LocalDate;
 
 import static org.junit.Assert.assertEquals;
-import static util.EagerQueries.*;
+import static util.queries.EagerQueries.*;
 
 /**
  * @author Miguel Gamboa

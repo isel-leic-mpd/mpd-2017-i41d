@@ -17,7 +17,7 @@
 
 import org.junit.Test;
 import util.FileRequest;
-import util.NaiveQueries;
+import util.queries.NaiveQueries;
 import util.WeatherPredicate;
 import weather.WeatherWebApi;
 import weather.model.WeatherInfo;
@@ -25,7 +25,7 @@ import weather.model.WeatherInfo;
 import java.time.LocalDate;
 
 import static org.junit.Assert.*;
-import static util.NaiveQueries.*;
+import static util.queries.NaiveQueries.*;
 
 /**
  * @author Miguel Gamboa
