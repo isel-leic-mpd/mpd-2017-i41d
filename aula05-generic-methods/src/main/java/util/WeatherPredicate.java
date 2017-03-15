@@ -23,6 +23,21 @@ import weather.model.WeatherInfo;
  * @author Miguel Gamboa
  *         created on 14-03-2017
  */
+
+/**
+ * This is a functional interface because it has one and only one method.
+ * Thus we can assign a lambda expression to every place of WeatherPredicate
+ * type.
+ */
+@FunctionalInterface
 public interface WeatherPredicate {
+
     boolean test(WeatherInfo item);
+
+    /*
+     * Dá erro de compilação porque uma interface anotada com @FunctionalInterface
+     * Só pode ter 1 método abstracto.
+     *
+     * void bar();
+     */
 }
