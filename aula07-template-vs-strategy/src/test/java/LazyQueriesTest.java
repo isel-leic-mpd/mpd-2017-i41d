@@ -17,7 +17,6 @@
 
 import org.junit.Test;
 import util.FileRequest;
-import util.queries.EagerQueries;
 import util.queries.LazyQueries;
 import weather.WeatherWebApi;
 import weather.model.WeatherInfo;
@@ -25,6 +24,8 @@ import weather.model.WeatherInfo;
 import java.time.LocalDate;
 
 import static org.junit.Assert.assertEquals;
+import static util.queries.LazyQueries.*;
+import static util.queries.LazyQueries.filter;
 
 /**
  * @author Miguel Gamboa
@@ -36,11 +37,12 @@ public class LazyQueriesTest {
     public void testLazyFilterAndMapAndDistinct(){
         WeatherWebApi api = new WeatherWebApi(new FileRequest());
         Iterable<WeatherInfo> infos = api.pastWeather(41.15, -8.6167, LocalDate.of(2017,02,01),LocalDate.of(2017,02,28));
-        infos = LazyQueries.filter(infos, info -> info.getDescription().toLowerCase().contains("sun"));
-        // <=> Iterable<Integer> temps = EagerQueries.map(infos, info -> info.getTempC());
-        // Iterable<Integer> temps = EagerQueries.map(infos, WeatherInfo::getTempC);
-        // temps = EagerQueries.distinct(temps);
-        assertEquals(8, EagerQueries.count(infos));
-        infos.forEach(System.out::println);
+        infos = filter(infos, info -> info.getDescription().toLowerCase().contains("sun"));
+        Iterable<Integer> temps = map(infos, info -> info.getTempC());
+        // temps = map(infos, WeatherInfo::getTempC);
+        temps = distinct(temps);
+        assertEquals(5, count(temps));
+        assertEquals((long) 21, (long) skip(temps, 2).iterator().next());
+        temps.forEach(System.out::println);
     }
 }

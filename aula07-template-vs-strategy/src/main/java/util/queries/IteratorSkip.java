@@ -18,42 +18,28 @@
 package util.queries;
 
 import java.util.Iterator;
-import java.util.function.Predicate;
 
 /**
- * @author Miguel Gamboa
- *         created on 15-03-2017
+ * Created by baltasarb on 3/18/2017.
  */
-public class IteratorFilter<T> implements Iterator<T> {
-    final Iterator<T> src;
-    final Predicate<T> p;
-    private T nextItem;
+public class IteratorSkip<T> implements Iterator<T> {
 
-    public IteratorFilter(Iterator<T> src, Predicate<T> p) {
-        this.src = src;
-        this.p = p;
-        this.nextItem = moveNext();
-    }
+    private Iterator<T> iterator;
 
-    private T moveNext() {
-        T item = null;
-        while(src.hasNext()) {
-            item = src.next();
-            if(p.test(item))
-                return item;
+    public IteratorSkip(Iterator<T> iterator, int nr) {
+        this.iterator = iterator;
+        for (int i = 0; i < nr && iterator.hasNext(); i++) {
+            iterator.next();
         }
-        return null;
     }
 
     @Override
     public boolean hasNext() {
-        return nextItem != null;
+        return iterator.hasNext();
     }
 
     @Override
     public T next() {
-        T curr = nextItem;
-        nextItem = moveNext();
-        return curr;
+        return iterator.next();
     }
 }

@@ -18,6 +18,7 @@
 package util.queries;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -29,16 +30,25 @@ import java.util.function.Predicate;
 public class LazyQueries {
 
     public static <T> Iterable<T> filter(Iterable<T> data, Predicate<T> p) {
+        // A lambda corresponde à implementação de Iterable::iterator()
         return () -> new IteratorFilter(data.iterator(), p);
     }
 
     public static <T, R> Iterable<R> map(Iterable<T> data, Function<T, R> mapper) {
 
-        return null;
+        return () -> new IteratorMap(data.iterator(), mapper);
     }
 
     public static <T> Iterable<T> distinct(Iterable<T> data) {
-        return null;
+        return () -> new IteratorDistinct(data.iterator());
+    }
+
+    public static <T> Iterable<T> skip(Iterable<T> data, int nr) {
+        return () -> {
+            Iterator<T> iter = data.iterator();
+            for (int i = 0; i < nr && iter.hasNext(); i++) iter.next();
+            return iter;
+        };
     }
 
     public static <T> int count(Iterable<T> data) {

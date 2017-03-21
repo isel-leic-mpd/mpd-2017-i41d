@@ -17,30 +17,32 @@
 
 package util.queries;
 
+import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.function.Predicate;
 
 /**
- * @author Miguel Gamboa
- *         created on 15-03-2017
+ * Created by baltasarb on 3/18/2017.
  */
-public class IteratorFilter<T> implements Iterator<T> {
-    final Iterator<T> src;
-    final Predicate<T> p;
+public class IteratorDistinct<T> implements Iterator<T> {
+
+    private Iterator<T> data;
+    private ArrayList<T> distinctData;
     private T nextItem;
 
-    public IteratorFilter(Iterator<T> src, Predicate<T> p) {
-        this.src = src;
-        this.p = p;
-        this.nextItem = moveNext();
+    public IteratorDistinct(Iterator<T> data){
+        this.data=data;
+        distinctData = new ArrayList<>();
+        nextItem = getNext();
     }
 
-    private T moveNext() {
-        T item = null;
-        while(src.hasNext()) {
-            item = src.next();
-            if(p.test(item))
+    private T getNext() {
+        T item;
+        while(data.hasNext()) {
+            item = data.next();
+            if(!distinctData.contains(item)) {
+                distinctData.add(item);
                 return item;
+            }
         }
         return null;
     }
@@ -52,8 +54,8 @@ public class IteratorFilter<T> implements Iterator<T> {
 
     @Override
     public T next() {
-        T curr = nextItem;
-        nextItem = moveNext();
-        return curr;
+        T currentItem = nextItem;
+        nextItem = getNext();
+        return currentItem;
     }
 }

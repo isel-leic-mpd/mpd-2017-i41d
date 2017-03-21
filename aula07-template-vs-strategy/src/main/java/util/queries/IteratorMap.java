@@ -18,42 +18,29 @@
 package util.queries;
 
 import java.util.Iterator;
-import java.util.function.Predicate;
+import java.util.NoSuchElementException;
+import java.util.function.Function;
 
 /**
- * @author Miguel Gamboa
- *         created on 15-03-2017
+ * Created by baltasarb on 3/18/2017.
  */
-public class IteratorFilter<T> implements Iterator<T> {
-    final Iterator<T> src;
-    final Predicate<T> p;
-    private T nextItem;
+public class IteratorMap<T,R> implements Iterator<R> {
 
-    public IteratorFilter(Iterator<T> src, Predicate<T> p) {
+    private Iterator <T>src;
+    private Function <T,R> mapper;
+
+    public IteratorMap(Iterator<T> src, Function<T, R> mapper) {
         this.src = src;
-        this.p = p;
-        this.nextItem = moveNext();
-    }
-
-    private T moveNext() {
-        T item = null;
-        while(src.hasNext()) {
-            item = src.next();
-            if(p.test(item))
-                return item;
-        }
-        return null;
+        this.mapper = mapper;
     }
 
     @Override
     public boolean hasNext() {
-        return nextItem != null;
+        return src.hasNext();
     }
 
     @Override
-    public T next() {
-        T curr = nextItem;
-        nextItem = moveNext();
-        return curr;
+    public R next() {
+        return mapper.apply(src.next());
     }
 }
