@@ -2,11 +2,14 @@ import util.queries.EagerQueries;
 import util.HttpRequest;
 import util.IRequest;
 import util.WeatherPredicate;
+import util.queries.LazyQueries;
 import weather.WeatherWebApi;
+import weather.model.Location;
 import weather.model.WeatherInfo;
 
 import java.time.LocalDate;
 import java.util.Comparator;
+import java.util.function.Function;
 
 import static java.lang.System.out;
 
@@ -16,53 +19,18 @@ import static java.lang.System.out;
 public class App {
 
     public static void main(String[] args) {
-        /*
-         * Arrange
-         */
         IRequest req = new HttpRequest(); // new FileRequest();
-        WeatherWebApi api = new WeatherWebApi(req);
-        /*
-         * Act
-         */
-        Iterable<WeatherInfo> infos = api.pastWeather(41.15, -8.6167, LocalDate.of(2017,02,01),LocalDate.of(2017,02,28));
-        // infos = NaiveQueries.filter(infos, info -> info.getTempC() < 13);
-        infos = EagerQueries.<WeatherInfo>filter(infos, info -> info.getTempC() < 13);
-        infos = EagerQueries.filter(infos, info -> info.getTempC() < 13);
-        /*
-         * Assert
-         */
-        infos.forEach(out::println);
-
-        /*
-         * Exemplos de expressões lambdas aplicadas a expressões do tipo
-         * interface funcional.
-         */
-        Comparator<String> cmp1 =  (item1, item2) -> item1.length() - item2.length();
-        Comparator<String> cmp2 =  (item1, item2) -> { return 0; };
-
-
-    }
-}
-
-class WeatherByDescription implements WeatherPredicate {
-
-    final String query;
-
-    public WeatherByDescription(String query) {
-        this.query = query;
-    }
-
-    @Override
-    public boolean test(WeatherInfo item) {
-        return item.getDescription().toLowerCase().contains(query);
-    }
-}
-
-class WeatherDryDays implements WeatherPredicate {
-
-    @Override
-    public boolean test(WeatherInfo item) {
-        return item.getPrecipMM() == 0;
+        Function<String, Iterable<String>> logger = path -> () -> {
+            System.out.println("Requesting...");
+            return req.getContent(path).iterator();
+        };
+        // WeatherWebApi api = new WeatherWebApi(path -> logger.apply(path));
+        WeatherWebApi api = new WeatherWebApi(logger::apply);
+        System.out.println("Searching...");
+        Iterable<Location> locals = api.search("oporto");
+        System.out.println("Filtering...");
+        LazyQueries.filter(locals, l -> l.getLatitude() > 0);
+        // locals.forEach(System.out::println);
     }
 }
 

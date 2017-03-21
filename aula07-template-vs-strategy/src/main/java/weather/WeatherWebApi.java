@@ -18,6 +18,7 @@
 package weather;
 
 import util.IRequest;
+import util.queries.LazyQueries;
 import weather.model.Location;
 import weather.model.WeatherInfo;
 
@@ -31,6 +32,9 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Predicate;
+
+import static util.queries.LazyQueries.*;
 
 /**
  * @author Miguel Gamboa
@@ -74,15 +78,12 @@ public class WeatherWebApi {
      */
 
     public Iterable<Location> search(String query) {
-        String url=WEATHER_HOST + WEATHER_SEARCH + WEATHER_SEARCH_ARGS;
+        String url = WEATHER_HOST + WEATHER_SEARCH + WEATHER_SEARCH_ARGS;
         url = String.format(url, query, WEATHER_TOKEN);
-        List<Location> locations= new ArrayList<>();
-        Iterator<String> iteratorString= req.getContent(url).iterator();
-        while(iteratorString.hasNext()) {
-            String line = iteratorString.next();
-            if(!line.startsWith("#")) locations.add(Location.valueOf(line));
-        }
-        return locations;
+        Iterable<String> iterable =	filter(
+                req.getContent(url),
+                (String s) -> !s.startsWith("#"));
+        return map(iterable,Location::valueOf);
     }
 
     /**
@@ -97,15 +98,17 @@ public class WeatherWebApi {
         String query = lat + "," + log;
         String path = WEATHER_HOST + WEATHER_PAST +
                 String.format(WEATHER_PAST_ARGS, query, from, to, WEATHER_TOKEN);
-        List<WeatherInfo> res = new ArrayList<>();
-        Iterator<String> iter = req.getContent(path).iterator();
-        while(iter.next().startsWith("#")) { }
-        iter.next(); // Skip line: Not Available
-        while(iter.hasNext()) {
-            String line = iter.next(); // Skip Daily Info
-            res.add(WeatherInfo.valueOf(line));
-            if(iter.hasNext()) iter.next();
-        }
-        return res;
+        Iterable<String> stringIterable = LazyQueries.filter(req.getContent(path),s->!s.startsWith("#"));
+        Iterable<String>filtered = LazyQueries.skip(stringIterable,1);	//  Skip line: Not Available
+        Predicate<String> isEvenLine = new Predicate<String>() {
+            int counter = 0;
+            @Override
+            public boolean test(String s) {
+                counter++;
+                return counter%2==0;
+            }
+        };
+        filtered = LazyQueries.filter(filtered,isEvenLine);//even lines filter
+        return LazyQueries.map(filtered, WeatherInfo::valueOf);//to weatherinfo objects
     }
 }

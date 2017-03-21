@@ -34,15 +34,16 @@ import java.util.List;
 public class HttpRequest implements IRequest {
     @Override
     public Iterable<String> getContent(String path) {
+            return () -> httpGet(path);
+    }
+    public Iterator<String> httpGet(String path) {
+        InputStream in = null;
         try {
-            InputStream in = new URL(path).openStream();
-            /*
-             * Consumir o Inputstream e adicionar dados ao res
-             */
-            Iterator<String> iter = new IteratorFromReader(in);
-            return () -> iter;
+            in = new URL(path).openStream();
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
+        Iterator<String> iter = new IteratorFromReader(in);
+        return iter;
     }
 }
