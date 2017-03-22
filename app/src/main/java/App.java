@@ -19,21 +19,40 @@ import static java.lang.System.out;
 public class App {
 
     public static void main(String[] args) {
+        lazy();
+    }
+    public static void eager() {
         IRequest req = new HttpRequest(); // new FileRequest();
         IRequest logger = path -> () -> {
-            System.out.println("Requesting...");
+            out.println("Requesting...");
             return req.getContent(path).iterator();
         };
         // WeatherWebApi api = new WeatherWebApi(path -> logger.apply(path));
         WeatherWebApi api = new WeatherWebApi(logger);
-        System.out.println("Searching...");
+        out.println("Searching...");
         Iterable<Location> locals = api.search("oporto");
-        System.out.println("Filtering...");
-        LazyQueries.filter(locals, l -> l.getLatitude() > 0);
-        System.out.println("MApping...");
-        LazyQueries
-                .map(locals, l -> l.getRegion())
-                .forEach(System.out::println); // operação terminal
+        out.println("Filtering...");
+        locals = EagerQueries.filter(locals, l -> {out.println("filter...." + l); return l.getLatitude() > 0; });
+        out.println("MApping...");
+        Iterable<String> locs = EagerQueries.map(locals, l -> {out.println("map..." + l); return l.getRegion();});
+        // out.println(locs.iterator().next());
+    }
+
+    public static void lazy() {
+        IRequest req = new HttpRequest(); // new FileRequest();
+        IRequest logger = path -> () -> {
+            out.println("Requesting...");
+            return req.getContent(path).iterator();
+        };
+        // WeatherWebApi api = new WeatherWebApi(path -> logger.apply(path));
+        WeatherWebApi api = new WeatherWebApi(logger);
+        out.println("Searching...");
+        Iterable<Location> locals = api.search("oporto");
+        out.println("Filtering...");
+        locals = LazyQueries.filter(locals, l -> {out.println("filter...." + l); return l.getLatitude() > 0; });
+        out.println("MApping...");
+        Iterable<String> locs = LazyQueries.map(locals, l -> {out.println("map..." + l); return l.getRegion();});
+        out.println(locs.iterator().next());
     }
 }
 
