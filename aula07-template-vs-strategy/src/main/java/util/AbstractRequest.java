@@ -17,27 +17,18 @@
 
 package util;
 
-import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.UncheckedIOException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 
 /**
  * @author Miguel Gamboa
- *         created on 08-03-2017
+ *         created on 22-03-2017
  */
-public class HttpRequest extends AbstractRequest {
+public abstract class AbstractRequest implements IRequest {
     @Override
-    public InputStream getStream(String path) {
-        try {
-            return new URL(path).openStream();
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+    public final Iterable<String> getContent(String path) {
+        return () -> new IteratorFromReader(getStream(path));
     }
+
+    protected abstract InputStream getStream(String path);
+
 }
