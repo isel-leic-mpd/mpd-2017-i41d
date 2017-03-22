@@ -20,17 +20,20 @@ public class App {
 
     public static void main(String[] args) {
         IRequest req = new HttpRequest(); // new FileRequest();
-        Function<String, Iterable<String>> logger = path -> () -> {
+        IRequest logger = path -> () -> {
             System.out.println("Requesting...");
             return req.getContent(path).iterator();
         };
         // WeatherWebApi api = new WeatherWebApi(path -> logger.apply(path));
-        WeatherWebApi api = new WeatherWebApi(logger::apply);
+        WeatherWebApi api = new WeatherWebApi(logger);
         System.out.println("Searching...");
         Iterable<Location> locals = api.search("oporto");
         System.out.println("Filtering...");
         LazyQueries.filter(locals, l -> l.getLatitude() > 0);
-        // locals.forEach(System.out::println);
+        System.out.println("MApping...");
+        LazyQueries
+                .map(locals, l -> l.getRegion())
+                .forEach(System.out::println); // operação terminal
     }
 }
 
