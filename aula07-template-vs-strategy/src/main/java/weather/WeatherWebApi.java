@@ -29,9 +29,6 @@ import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
 import java.net.URL;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 import java.util.function.Predicate;
 
 import static util.queries.LazyQueries.*;
@@ -98,17 +95,11 @@ public class WeatherWebApi {
         String query = lat + "," + log;
         String path = WEATHER_HOST + WEATHER_PAST +
                 String.format(WEATHER_PAST_ARGS, query, from, to, WEATHER_TOKEN);
-        Iterable<String> stringIterable = LazyQueries.filter(req.getContent(path),s->!s.startsWith("#"));
-        Iterable<String>filtered = LazyQueries.skip(stringIterable,1);	//  Skip line: Not Available
-        Predicate<String> isEvenLine = new Predicate<String>() {
-            int counter = 0;
-            @Override
-            public boolean test(String s) {
-                counter++;
-                return counter%2==0;
-            }
-        };
-        filtered = LazyQueries.filter(filtered,isEvenLine);//even lines filter
-        return LazyQueries.map(filtered, WeatherInfo::valueOf);//to weatherinfo objects
+        Iterable<String> stringIterable = filter(req.getContent(path),s->!s.startsWith("#"));
+        Iterable<String>filtered = skip(stringIterable,1);	//  Skip line: Not Available
+        int[] counter = {0};
+        Predicate<String> isEvenLine = item -> ++counter[0] % 2==0;
+        filtered = filter(filtered,isEvenLine);//even lines filter
+        return map(filtered, WeatherInfo::valueOf); //to weatherinfo objects
     }
 }
