@@ -12,7 +12,7 @@ repositories {
 }
 
 dependencies {
-    compile project(':aula08-template-vs-strategy')
+    compile project(':aula09-composition-and-decorator')
 
     // Use JUnit test framework
     testCompile 'junit:junit:4.12'

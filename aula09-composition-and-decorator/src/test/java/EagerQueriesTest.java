@@ -17,6 +17,7 @@
 
 import org.junit.Test;
 import util.FileRequest;
+import util.IRequest;
 import weather.WeatherWebApi;
 import weather.model.WeatherInfo;
 
@@ -33,13 +34,25 @@ public class EagerQueriesTest {
 
     @Test
     public void testEagerFilter(){
-        WeatherWebApi api = new WeatherWebApi(new FileRequest());
+        IRequest fileReq = new FileRequest();
+        int[] counter = {0};
+        IRequest req = path -> () -> {
+            counter[0]++;
+            return  fileReq.getContent(path).iterator();
+        };
+        WeatherWebApi api = new WeatherWebApi(req);
         Iterable<WeatherInfo> infos = api.pastWeather(41.15, -8.6167, LocalDate.of(2017,02,01),LocalDate.of(2017,02,28));
+        assertEquals(0, counter[0]);
         infos = filter(infos, info -> info.getDescription().toLowerCase().contains("sun"));
+        assertEquals(1, counter[0]);
         // <=> Iterable<Integer> temps = EagerQueries.map(infos, info -> info.getTempC());
         Iterable<Integer> temps = map(infos, WeatherInfo::getTempC);
+        assertEquals(1, counter[0]);
         temps = distinct(temps);
+        assertEquals(1, counter[0]);
         assertEquals(5, count(temps));
+        assertEquals(1, counter[0]);
         temps.forEach(System.out::println);
+        assertEquals(1, counter[0]);
     }
 }

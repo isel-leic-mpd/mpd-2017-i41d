@@ -17,7 +17,7 @@
 
 import org.junit.Test;
 import util.FileRequest;
-import util.queries.LazyQueries;
+import util.IRequest;
 import weather.WeatherWebApi;
 import weather.model.WeatherInfo;
 
@@ -25,7 +25,6 @@ import java.time.LocalDate;
 
 import static org.junit.Assert.assertEquals;
 import static util.queries.LazyQueries.*;
-import static util.queries.LazyQueries.filter;
 
 /**
  * @author Miguel Gamboa
@@ -33,16 +32,41 @@ import static util.queries.LazyQueries.filter;
  */
 public class LazyQueriesTest {
 
+    class Counter implements IRequest {
+        final IRequest req;
+        int counter;
+
+        public Counter(IRequest req) {
+            this.req = req;
+        }
+
+        @Override
+        public Iterable<String> getContent(String path) {
+            return () -> {
+                counter++;
+                return req.getContent(path).iterator();
+            };
+        }
+    }
+
     @Test
     public void testLazyFilterAndMapAndDistinct(){
-        WeatherWebApi api = new WeatherWebApi(new FileRequest());
+        Counter req = new Counter(new FileRequest());
+        WeatherWebApi api = new WeatherWebApi(req);
         Iterable<WeatherInfo> infos = api.pastWeather(41.15, -8.6167, LocalDate.of(2017,02,01),LocalDate.of(2017,02,28));
+        assertEquals(0, req.counter);
         infos = filter(infos, info -> info.getDescription().toLowerCase().contains("sun"));
+        assertEquals(0, req.counter);
         Iterable<Integer> temps = map(infos, info -> info.getTempC());
+        assertEquals(0, req.counter);
         // temps = map(infos, WeatherInfo::getTempC);
         temps = distinct(temps);
+        assertEquals(0, req.counter);
         assertEquals(5, count(temps));
+        assertEquals(1, req.counter);
         assertEquals((long) 21, (long) skip(temps, 2).iterator().next());
+        assertEquals(2, req.counter);
         temps.forEach(System.out::println);
+        assertEquals(3, req.counter);
     }
 }
