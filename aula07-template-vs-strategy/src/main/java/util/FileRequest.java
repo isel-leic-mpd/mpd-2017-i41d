@@ -29,14 +29,9 @@ import java.util.Iterator;
  * @author Miguel Gamboa
  *         created on 08-03-2017
  */
-public class FileRequest implements IRequest{
+public class FileRequest extends AbstractRequest{
     @Override
-    public Iterable<String> getContent(String path) {
-        return () ->
-                readFile(path);
-    }
-
-    private Iterator<String> readFile(String path) {
+    public InputStream getStream(String path) {
         String[] parts = path.split("/");
         path = parts[parts.length-1]
                 .replace('?', '-')
@@ -45,11 +40,7 @@ public class FileRequest implements IRequest{
                 .replace(',', '-')
                 .substring(0,68);
         try {
-            InputStream in = ClassLoader.getSystemResource(path).openStream();
-            /*
-             * Consumir o Inputstream e adicionar dados ao res
-             */
-            return new IteratorFromReader(in);
+            return ClassLoader.getSystemResource(path).openStream();
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
