@@ -17,21 +17,21 @@
 
 package util;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
-import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.function.Function;
 
 /**
  * @author Miguel Gamboa
  *         created on 08-03-2017
  */
-public class FileRequest extends AbstractRequest{
-    @Override
-    public InputStream getStream(String path) {
+public class FileRequest extends Request {
+    public FileRequest() {
+        super(FileRequest::getStream);
+    }
+
+    public static InputStream getStream(String path) {
         String[] parts = path.split("/");
         path = parts[parts.length-1]
                 .replace('?', '-')

@@ -18,17 +18,23 @@
 package util;
 
 import java.io.InputStream;
+import java.util.function.Function;
 
 /**
  * @author Miguel Gamboa
  *         created on 22-03-2017
  */
-public abstract class AbstractRequest implements IRequest {
-    @Override
-    public final Iterable<String> getContent(String path) {
-        return () -> new IteratorFromReader(getStream(path));
+public class Request implements IRequest {
+
+    final Function<String, InputStream> getStream;
+
+    public Request(Function<String, InputStream> getStream) {
+        this.getStream = getStream;
     }
 
-    protected abstract InputStream getStream(String path);
+    @Override
+    public final Iterable<String> getContent(String path) {
+        return () -> new IteratorFromReader(getStream.apply(path));
+    }
 
 }
