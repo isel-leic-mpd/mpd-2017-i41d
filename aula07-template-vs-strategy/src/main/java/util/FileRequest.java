@@ -32,6 +32,11 @@ import java.util.Iterator;
 public class FileRequest implements IRequest{
     @Override
     public Iterable<String> getContent(String path) {
+        return () ->
+                readFile(path);
+    }
+
+    private Iterator<String> readFile(String path) {
         String[] parts = path.split("/");
         path = parts[parts.length-1]
                 .replace('?', '-')
@@ -44,8 +49,7 @@ public class FileRequest implements IRequest{
             /*
              * Consumir o Inputstream e adicionar dados ao res
              */
-            Iterator<String> iter = new IteratorFromReader(in);
-            return () -> iter;
+            return new IteratorFromReader(in);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
