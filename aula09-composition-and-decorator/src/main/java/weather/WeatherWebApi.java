@@ -75,11 +75,10 @@ public class WeatherWebApi {
      */
 
     public Iterable<Location> search(String query) {
-        String url = WEATHER_HOST + WEATHER_SEARCH + WEATHER_SEARCH_ARGS;
-        url = String.format(url, query, WEATHER_TOKEN);
-        Iterable<String> iterable =	filter(
-                req.getContent(url),
-                (String s) -> !s.startsWith("#"));
+        String path = WEATHER_HOST + WEATHER_SEARCH + WEATHER_SEARCH_ARGS;
+        String url = String.format(path, query, WEATHER_TOKEN);
+        Iterable<String> content = () -> req.getContent(url).iterator();
+        Iterable<String> iterable =	filter(content, (String s) -> !s.startsWith("#"));
         return map(iterable,Location::valueOf);
     }
 
@@ -95,7 +94,8 @@ public class WeatherWebApi {
         String query = lat + "," + log;
         String path = WEATHER_HOST + WEATHER_PAST +
                 String.format(WEATHER_PAST_ARGS, query, from, to, WEATHER_TOKEN);
-        Iterable<String> stringIterable = filter(req.getContent(path),s->!s.startsWith("#"));
+        Iterable<String> content = () -> req.getContent(path).iterator();
+        Iterable<String> stringIterable = filter(content, s->!s.startsWith("#"));
         Iterable<String>filtered = skip(stringIterable,1);	//  Skip line: Not Available
         int[] counter = {0};
         Predicate<String> isEvenLine = item -> ++counter[0] % 2==0;

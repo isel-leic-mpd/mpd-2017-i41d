@@ -40,12 +40,11 @@ public class App {
 
     public static void lazy() {
         IRequest req = new HttpRequest(); // new FileRequest();
-        IRequest logger = path -> () -> {
+        Function<String, Iterable<String>> logger = path -> {
             out.println("Requesting...");
-            return req.getContent(path).iterator();
+            return req.getContent(path);
         };
-        // WeatherWebApi api = new WeatherWebApi(path -> logger.apply(path));
-        WeatherWebApi api = new WeatherWebApi(logger);
+        WeatherWebApi api = new WeatherWebApi(logger::apply);
         out.println("Searching...");
         Iterable<Location> locals = api.search("oporto");
         out.println("Filtering...");

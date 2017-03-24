@@ -42,10 +42,8 @@ public class LazyQueriesTest {
 
         @Override
         public Iterable<String> getContent(String path) {
-            return () -> {
-                counter++;
-                return req.getContent(path).iterator();
-            };
+            counter++;
+            return req.getContent(path);
         }
     }
 
