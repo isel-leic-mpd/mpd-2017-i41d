@@ -1,3 +1,4 @@
+import util.Loggify;
 import util.queries.EagerQueries;
 import util.HttpRequest;
 import util.IRequest;
@@ -23,12 +24,12 @@ public class App {
     }
     public static void eager() {
         IRequest req = new HttpRequest(); // new FileRequest();
-        IRequest logger = path -> () -> {
-            out.println("Requesting...");
-            return req.getContent(path).iterator();
-        };
-        // WeatherWebApi api = new WeatherWebApi(path -> logger.apply(path));
-        WeatherWebApi api = new WeatherWebApi(logger);
+        /**
+         * req::getContent --> inner
+         * "Requestin..."  --> msg
+         */
+        Function<String, Iterable<String>> log = Loggify.of(req::getContent, "Requesting...");
+        WeatherWebApi api = new WeatherWebApi(log::apply);
         out.println("Searching...");
         Iterable<Location> locals = api.search("oporto");
         out.println("Filtering...");
@@ -40,11 +41,12 @@ public class App {
 
     public static void lazy() {
         IRequest req = new HttpRequest(); // new FileRequest();
-        Function<String, Iterable<String>> logger = path -> {
-            out.println("Requesting...");
-            return req.getContent(path);
-        };
-        WeatherWebApi api = new WeatherWebApi(logger::apply);
+        /**
+         * req::getContent --> inner
+         * "Requestin..."  --> msg
+         */
+        Function<String, Iterable<String>> log = Loggify.of(req::getContent, "Requesting...");
+        WeatherWebApi api = new WeatherWebApi(log::apply);
         out.println("Searching...");
         Iterable<Location> locals = api.search("oporto");
         out.println("Filtering...");
