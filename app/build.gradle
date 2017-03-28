@@ -12,7 +12,7 @@ repositories {
 }
 
 dependencies {
-    compile project(':aula09-composition-and-decorator')
+    compile project(':aula10-domain-and-dtos')
 
     // Use JUnit test framework
     testCompile 'junit:junit:4.12'

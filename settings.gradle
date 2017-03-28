@@ -1,4 +1,4 @@
 // To declare projects as part of a multi-project build use the 'include' method
 include 'app'
 include 'aula01'
-include 'aula09-composition-and-decorator'
+include 'aula10-domain-and-dtos'
