@@ -18,7 +18,7 @@
 import org.junit.Test;
 import util.FileRequest;
 import weather.WeatherWebApi;
-import weather.model.WeatherInfo;
+import weather.dto.WeatherInfo;
 
 import java.time.LocalDate;
 

@@ -20,7 +20,7 @@ import util.FileRequest;
 import util.queries.NaiveQueries;
 import util.WeatherPredicate;
 import weather.WeatherWebApi;
-import weather.model.WeatherInfo;
+import weather.dto.WeatherInfo;
 
 import java.time.LocalDate;
 

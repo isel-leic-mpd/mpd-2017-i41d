@@ -18,7 +18,7 @@
 package util.queries;
 
 import util.WeatherPredicate;
-import weather.model.WeatherInfo;
+import weather.data.dto.WeatherInfoDto;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,21 +35,21 @@ public class NaiveQueries {
 
     /**
      * v1- Auxiliary method to filter cloudy days. Returns a new sequence with
-     * WeatherInfo objects that were cloudy.
+     * WeatherInfoDto objects that were cloudy.
      * Eager approach.
      */
-    public static Iterable<WeatherInfo> filterCloudy(Iterable<WeatherInfo> data) {
-        List<WeatherInfo> res = new ArrayList<>();
-        for (WeatherInfo item: data) {
+    public static Iterable<WeatherInfoDto> filterCloudy(Iterable<WeatherInfoDto> data) {
+        List<WeatherInfoDto> res = new ArrayList<>();
+        for (WeatherInfoDto item: data) {
             if(item.getDescription().toLowerCase().contains("cloud"))
                 res.add(item);
         }
         return res;
     }
 
-    public static Iterable<WeatherInfo> filterRainy(Iterable<WeatherInfo> data) {
-        List<WeatherInfo> res = new ArrayList<>();
-        for (WeatherInfo item: data) {
+    public static Iterable<WeatherInfoDto> filterRainy(Iterable<WeatherInfoDto> data) {
+        List<WeatherInfoDto> res = new ArrayList<>();
+        for (WeatherInfoDto item: data) {
             if(item.getDescription().toLowerCase().contains("rain"))
                 res.add(item);
         }
@@ -59,9 +59,9 @@ public class NaiveQueries {
     /**
      * v2-
      */
-    public static Iterable<WeatherInfo> filterDesc(Iterable<WeatherInfo> data, String query) {
-        List<WeatherInfo> res = new ArrayList<>();
-        for (WeatherInfo item: data) {
+    public static Iterable<WeatherInfoDto> filterDesc(Iterable<WeatherInfoDto> data, String query) {
+        List<WeatherInfoDto> res = new ArrayList<>();
+        for (WeatherInfoDto item: data) {
             if(item.getDescription().toLowerCase().contains(query))
                 res.add(item);
         }
@@ -71,18 +71,18 @@ public class NaiveQueries {
     /**
      * v3 -
      */
-    public static Iterable<WeatherInfo> filter(Iterable<WeatherInfo> data, WeatherPredicate p) {
-        List<WeatherInfo> res = new ArrayList<>();
-        for (WeatherInfo item: data) {
+    public static Iterable<WeatherInfoDto> filter(Iterable<WeatherInfoDto> data, WeatherPredicate p) {
+        List<WeatherInfoDto> res = new ArrayList<>();
+        for (WeatherInfoDto item: data) {
             if(p.test(item))
                 res.add(item);
         }
         return res;
     }
 
-    public static int count(Iterable<WeatherInfo> data) {
+    public static int count(Iterable<WeatherInfoDto> data) {
         int size = 0;
-        for (WeatherInfo item: data) {
+        for (WeatherInfoDto item: data) {
             size++;
         }
         return size;

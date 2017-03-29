@@ -17,7 +17,7 @@
 
 package util;
 
-import weather.model.WeatherInfo;
+import weather.data.dto.WeatherInfoDto;
 
 /**
  * @author Miguel Gamboa
@@ -32,7 +32,7 @@ import weather.model.WeatherInfo;
 @FunctionalInterface
 public interface WeatherPredicate {
 
-    boolean test(WeatherInfo item);
+    boolean test(WeatherInfoDto item);
 
     /*
      * Dá erro de compilação porque uma interface anotada com @FunctionalInterface

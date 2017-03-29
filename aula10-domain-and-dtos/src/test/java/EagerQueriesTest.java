@@ -19,9 +19,8 @@ import org.junit.Test;
 import util.Countify;
 import util.FileRequest;
 import util.ICounter;
-import util.IRequest;
-import weather.WeatherWebApi;
-import weather.model.WeatherInfo;
+import weather.data.WeatherWebApi;
+import weather.data.dto.WeatherInfoDto;
 
 import java.time.LocalDate;
 
@@ -38,12 +37,12 @@ public class EagerQueriesTest {
     public void testEagerFilter(){
         ICounter<String, Iterable<String>> req = Countify.of(new FileRequest()::getContent);
         WeatherWebApi api = new WeatherWebApi(req::apply);
-        Iterable<WeatherInfo> infos = api.pastWeather(41.15, -8.6167, LocalDate.of(2017,02,01),LocalDate.of(2017,02,28));
+        Iterable<WeatherInfoDto> infos = api.pastWeather(41.15, -8.6167, LocalDate.of(2017,02,01),LocalDate.of(2017,02,28));
         assertEquals(0, req.getCount());
         infos = filter(infos, info -> info.getDescription().toLowerCase().contains("sun"));
         assertEquals(1, req.getCount());
         // <=> Iterable<Integer> temps = EagerQueries.map(infos, info -> info.getTempC());
-        Iterable<Integer> temps = map(infos, WeatherInfo::getTempC);
+        Iterable<Integer> temps = map(infos, WeatherInfoDto::getTempC);
         assertEquals(1, req.getCount());
         temps = distinct(temps);
         assertEquals(1, req.getCount());

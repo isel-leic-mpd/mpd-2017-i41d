@@ -17,7 +17,7 @@
 
 package util.queries;
 
-import weather.model.WeatherInfo;
+import weather.dto.WeatherInfo;
 
 import java.util.ArrayList;
 import java.util.List;

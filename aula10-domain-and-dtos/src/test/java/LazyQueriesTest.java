@@ -19,10 +19,8 @@ import org.junit.Test;
 import util.Countify;
 import util.FileRequest;
 import util.ICounter;
-import util.IRequest;
-import util.Loggify;
-import weather.WeatherWebApi;
-import weather.model.WeatherInfo;
+import weather.data.WeatherWebApi;
+import weather.data.dto.WeatherInfoDto;
 
 import java.time.LocalDate;
 
@@ -39,13 +37,13 @@ public class LazyQueriesTest {
     public void testLazyFilterAndMapAndDistinct(){
         ICounter<String, Iterable<String>> req = Countify.of(new FileRequest()::getContent);
         WeatherWebApi api = new WeatherWebApi(req::apply);
-        Iterable<WeatherInfo> infos = api.pastWeather(41.15, -8.6167, LocalDate.of(2017,02,01),LocalDate.of(2017,02,28));
+        Iterable<WeatherInfoDto> infos = api.pastWeather(41.15, -8.6167, LocalDate.of(2017,02,01),LocalDate.of(2017,02,28));
         assertEquals(0, req.getCount());
         infos = filter(infos, info -> info.getDescription().toLowerCase().contains("sun"));
         assertEquals(0, req.getCount());
         Iterable<Integer> temps = map(infos, info -> info.getTempC());
         assertEquals(0, req.getCount());
-        // temps = map(infos, WeatherInfo::getTempC);
+        // temps = map(infos, WeatherInfoDto::getTempC);
         temps = distinct(temps);
         assertEquals(0, req.getCount());
         assertEquals(5, count(temps));
