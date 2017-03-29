@@ -3,8 +3,10 @@ import util.queries.EagerQueries;
 import util.HttpRequest;
 import util.IRequest;
 import util.queries.LazyQueries;
+import weather.WeatherService;
 import weather.data.WeatherWebApi;
 import weather.data.dto.LocationDto;
+import weather.model.Location;
 
 import java.util.function.Function;
 
@@ -42,18 +44,16 @@ public class App {
          * "Requestin..."  --> msg
          */
         Function<String, Iterable<String>> log = Loggify.of(req::getContent, "Requesting...");
-        WeatherWebApi api = new WeatherWebApi(log::apply);
+        WeatherService api = new WeatherService(new WeatherWebApi(log::apply));
         out.println("Searching...");
-        Iterable<LocationDto> locals = api.search("oporto");
+        Iterable<Location> locals = api.search("oporto");
         out.println("Filtering...");
         locals = LazyQueries.filter(locals, l -> {out.println("filter...." + l); return l.getLatitude() > 0; });
-        // out.println("MApping...");
-        // Iterable<String> locs = LazyQueries.map(locals, l -> {out.println("map..." + l); return l.getRegion();});
-        LocationDto loc = locals.iterator().next();
+        Location loc = locals.iterator().next();
         out.println(loc); // Print first LocationDto in north hemisphere
 
         // Get the past weather for loc
-        // loc.last30daysWeather().forEach(out::println);
+        loc.getLast30daysWeather().forEach(out::println);
     }
 }
 
