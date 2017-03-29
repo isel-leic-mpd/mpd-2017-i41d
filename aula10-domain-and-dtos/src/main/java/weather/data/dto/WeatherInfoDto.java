@@ -15,22 +15,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package weather.model;
+package weather.data.dto;
 
 import java.time.LocalDate;
 
 /**
  * @author Miguel Gamboa
- *         created on 29-03-2017
+ *         created on 01-08-2016
  */
-public class WeatherInfo {
-    private final LocalDate date;
-    private final int tempC;
-    private final String description;
-    private final double  precipMM;
-    private final int feelsLikeC;
+public class WeatherInfoDto {
+    private final LocalDate date;     // index 0
+    private final int tempC;          // index 2
+    private final String description; // index 10
+    private final double  precipMM;   // index 11
+    private final int feelsLikeC;     // index 24
 
-    public WeatherInfo(LocalDate date, int tempC, String description, double precipMM, int feelsLikeC) {
+    public WeatherInfoDto(LocalDate date, int tempC, String description, double precipMM, int feelsLikeC) {
         this.date = date;
         this.tempC = tempC;
         this.description = description;
@@ -60,12 +60,26 @@ public class WeatherInfo {
 
     @Override
     public String toString() {
-        return "WeatherInfo{" +
-                "date=" + date +
+        return "WeatherInfoDto{" +
+                date +
                 ", tempC=" + tempC +
-                ", description='" + description + '\'' +
+                ", '" + description + '\'' +
                 ", precipMM=" + precipMM +
                 ", feelsLikeC=" + feelsLikeC +
                 '}';
+    }
+
+    /**
+     * Hourly information follows below the day according to the format of
+     * /past weather resource of the World Weather Online API
+     */
+    public static WeatherInfoDto valueOf(String line) {
+        String[] data = line.split(",");
+        return new WeatherInfoDto(
+                LocalDate.parse(data[0]),
+                Integer.parseInt(data[2]),
+                data[10],
+                Double.parseDouble(data[11]),
+                Integer.parseInt(data[24]));
     }
 }

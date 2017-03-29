@@ -19,8 +19,8 @@ import org.junit.Test;
 import util.FileRequest;
 import util.queries.NaiveQueries;
 import util.WeatherPredicate;
-import weather.WeatherWebApi;
-import weather.model.WeatherInfo;
+import weather.data.WeatherWebApi;
+import weather.data.dto.WeatherInfoDto;
 
 import java.time.LocalDate;
 
@@ -38,7 +38,7 @@ public class NaiveQueriesTest {
     @Test
     public void testFilterCloudyDays(){
         WeatherWebApi dataSrc = new WeatherWebApi(new FileRequest());
-        Iterable<WeatherInfo> data = dataSrc.pastWeather(41.15, -8.6167, LocalDate.of(2017,02,01), LocalDate.of(2017,02,28));
+        Iterable<WeatherInfoDto> data = dataSrc.pastWeather(41.15, -8.6167, LocalDate.of(2017,02,01), LocalDate.of(2017,02,28));
         data = NaiveQueries.filterCloudy(data);
         assertEquals(4, count(data));
 
@@ -50,7 +50,7 @@ public class NaiveQueriesTest {
     @Test
     public void testFilterRainyDays(){
         WeatherWebApi dataSrc = new WeatherWebApi(new FileRequest());
-        Iterable<WeatherInfo> data = dataSrc.pastWeather(41.15, -8.6167, LocalDate.of(2017,02,01), LocalDate.of(2017,02,28));
+        Iterable<WeatherInfoDto> data = dataSrc.pastWeather(41.15, -8.6167, LocalDate.of(2017,02,01), LocalDate.of(2017,02,28));
         data = NaiveQueries.filterRainy(data);
         assertEquals(14, count(data));
     }
@@ -62,7 +62,7 @@ public class NaiveQueriesTest {
     @Test
     public void testFilterByDesc(){
         WeatherWebApi dataSrc = new WeatherWebApi(new FileRequest());
-        Iterable<WeatherInfo> data = dataSrc.pastWeather(41.15, -8.6167, LocalDate.of(2017,02,01), LocalDate.of(2017,02,28));
+        Iterable<WeatherInfoDto> data = dataSrc.pastWeather(41.15, -8.6167, LocalDate.of(2017,02,01), LocalDate.of(2017,02,28));
         assertEquals(4, count(filterDesc(data, "cloud")));
         assertEquals(14, count(filterDesc(data, "rain")));
         assertEquals(7, count(filterDesc(data, "sunny")));
@@ -76,7 +76,7 @@ public class NaiveQueriesTest {
     @Test
     public void testFilterWithInnerClasses(){
         WeatherWebApi dataSrc = new WeatherWebApi(new FileRequest());
-        Iterable<WeatherInfo> data = dataSrc.pastWeather(41.15, -8.6167, LocalDate.of(2017,02,01), LocalDate.of(2017,02,28));
+        Iterable<WeatherInfoDto> data = dataSrc.pastWeather(41.15, -8.6167, LocalDate.of(2017,02,01), LocalDate.of(2017,02,28));
         assertEquals(4, count(filter(data, new WeatherDescriptionPredicate("cloud"))));
         assertEquals(14, count(filter(data, new WeatherDescriptionPredicate("rain"))));
         assertEquals(7, count(filter(data, new WeatherDescriptionPredicate("sunny"))));
@@ -90,7 +90,7 @@ public class NaiveQueriesTest {
     @Test
     public void testFilterWithLambdas(){
         WeatherWebApi dataSrc = new WeatherWebApi(new FileRequest());
-        Iterable<WeatherInfo> data = dataSrc.pastWeather(41.15, -8.6167, LocalDate.of(2017,02,01), LocalDate.of(2017,02,28));
+        Iterable<WeatherInfoDto> data = dataSrc.pastWeather(41.15, -8.6167, LocalDate.of(2017,02,01), LocalDate.of(2017,02,28));
         assertEquals(4, count(filter(data, item -> item.getDescription().toLowerCase().contains("cloudy"))));
         assertEquals(14, count(filter(data, item -> item.getDescription().toLowerCase().contains("rain"))));
         assertEquals(7, count(filter(data, item -> item.getDescription().toLowerCase().contains("sunny"))));
@@ -98,7 +98,7 @@ public class NaiveQueriesTest {
     }
 
     /**
-     * Auxiliary WeatherPredicate implementation to filter WeatherInfo objects
+     * Auxiliary WeatherPredicate implementation to filter WeatherInfoDto objects
      * by their description.
      */
     static class WeatherDescriptionPredicate implements WeatherPredicate {
@@ -110,19 +110,19 @@ public class NaiveQueriesTest {
         }
 
         @Override
-        public boolean test(WeatherInfo item) {
+        public boolean test(WeatherInfoDto item) {
             return item.getDescription().toLowerCase().contains(desc);
         }
     }
 
     /**
-     * Auxiliary WeatherDatePredicate implementation to filter WeatherInfo objects
+     * Auxiliary WeatherDatePredicate implementation to filter WeatherInfoDto objects
      * by date.
      */
     static class WeatherDryDays implements WeatherPredicate {
 
         @Override
-        public boolean test(WeatherInfo item) {
+        public boolean test(WeatherInfoDto item) {
             return item.getPrecipMM() == 0;
         }
     }

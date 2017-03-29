@@ -17,21 +17,28 @@
 
 package weather.model;
 
+import java.time.LocalDate;
+import java.util.function.BiFunction;
+
 /**
  * @author Miguel Gamboa
- *         created on 07-03-2017
+ *         created on 29-03-2017
  */
 public class Location {
     private final String country;
     private final String region;
     private final double latitude;
     private final double longitude;
+    private final Iterable<WeatherInfo> last30daysWeather;
+    private final BiFunction<LocalDate, LocalDate, Iterable<WeatherInfo>> pastWeather;
 
-    public Location(String country, String region, double latitude, double longitude) {
+    public Location(String country, String region, double latitude, double longitude, Iterable<WeatherInfo> last30daysWeather, BiFunction<LocalDate, LocalDate, Iterable<WeatherInfo>> pastWeather) {
         this.country = country;
         this.region = region;
         this.latitude = latitude;
         this.longitude = longitude;
+        this.last30daysWeather = last30daysWeather;
+        this.pastWeather = pastWeather;
     }
 
     public String getCountry() {
@@ -50,13 +57,12 @@ public class Location {
         return longitude;
     }
 
-    public static Location valueOf(String line) {
-        String[] data = line.split("\t");
-        return new Location(
-                data[1],
-                data[2],
-                Double.parseDouble(data[3]),
-                Double.parseDouble(data[4]));
+    public Iterable<WeatherInfo> getLast30daysWeather() {
+        return last30daysWeather;
+    }
+
+    public Iterable<WeatherInfo> getPastWeather(LocalDate from, LocalDate to) {
+        return pastWeather.apply(from, to);
     }
 
     @Override
@@ -66,6 +72,7 @@ public class Location {
                 ", region='" + region + '\'' +
                 ", latitude=" + latitude +
                 ", longitude=" + longitude +
+                ", last30daysWeather=" + last30daysWeather +
                 '}';
     }
 }

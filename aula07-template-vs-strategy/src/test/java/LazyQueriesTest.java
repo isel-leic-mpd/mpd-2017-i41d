@@ -19,7 +19,7 @@ import org.junit.Test;
 import util.FileRequest;
 import util.queries.LazyQueries;
 import weather.WeatherWebApi;
-import weather.model.WeatherInfo;
+import weather.dto.WeatherInfo;
 
 import java.time.LocalDate;
 

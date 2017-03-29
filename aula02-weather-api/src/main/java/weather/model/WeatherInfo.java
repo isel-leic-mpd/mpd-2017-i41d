@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package weather.model;
+package weather.dto;
 
 import java.time.LocalDate;
 

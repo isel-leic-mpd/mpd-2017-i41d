@@ -15,19 +15,19 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package weather.dto;
+package weather.data.dto;
 
 /**
  * @author Miguel Gamboa
  *         created on 07-03-2017
  */
-public class Location {
+public class LocationDto {
     private final String country;
     private final String region;
     private final double latitude;
     private final double longitude;
 
-    public Location(String country, String region, double latitude, double longitude) {
+    public LocationDto(String country, String region, double latitude, double longitude) {
         this.country = country;
         this.region = region;
         this.latitude = latitude;
@@ -50,9 +50,9 @@ public class Location {
         return longitude;
     }
 
-    public static Location valueOf(String line) {
+    public static LocationDto valueOf(String line) {
         String[] data = line.split("\t");
-        return new Location(
+        return new LocationDto(
                 data[1],
                 data[2],
                 Double.parseDouble(data[3]),
@@ -61,7 +61,7 @@ public class Location {
 
     @Override
     public String toString() {
-        return "Location{" +
+        return "LocationDto{" +
                 "country='" + country + '\'' +
                 ", region='" + region + '\'' +
                 ", latitude=" + latitude +

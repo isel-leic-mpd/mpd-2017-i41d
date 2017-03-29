@@ -15,12 +15,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package weather;
+package weather.data;
 
 import util.IRequest;
-import util.queries.LazyQueries;
-import weather.model.Location;
-import weather.model.WeatherInfo;
+import weather.data.dto.LocationDto;
+import weather.data.dto.WeatherInfoDto;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -74,18 +73,18 @@ public class WeatherWebApi {
      * E.g. http://api.worldweatheronline.com/free/v2/search.ashx?query=oporto&format=tab&key=*****
      */
 
-    public Iterable<Location> search(String query) {
+    public Iterable<LocationDto> search(String query) {
         String path = WEATHER_HOST + WEATHER_SEARCH + WEATHER_SEARCH_ARGS;
         String url = String.format(path, query, WEATHER_TOKEN);
         Iterable<String> content = () -> req.getContent(url).iterator();
         Iterable<String> iterable =	filter(content, (String s) -> !s.startsWith("#"));
-        return map(iterable,Location::valueOf);
+        return map(iterable, LocationDto::valueOf);
     }
 
     /**
      * E.g. http://api.worldweatheronline.com/free/v2/search.ashx?query=oporto&format=tab&key=*****
      */
-    public Iterable<WeatherInfo> pastWeather(
+    public Iterable<WeatherInfoDto> pastWeather(
             double lat,
             double log,
             LocalDate from,
@@ -100,6 +99,6 @@ public class WeatherWebApi {
         int[] counter = {0};
         Predicate<String> isEvenLine = item -> ++counter[0] % 2==0;
         filtered = filter(filtered,isEvenLine);//even lines filter
-        return map(filtered, WeatherInfo::valueOf); //to weatherinfo objects
+        return map(filtered, WeatherInfoDto::valueOf); //to weatherinfo objects
     }
 }

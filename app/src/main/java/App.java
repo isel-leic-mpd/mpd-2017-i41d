@@ -2,14 +2,12 @@ import util.Loggify;
 import util.queries.EagerQueries;
 import util.HttpRequest;
 import util.IRequest;
-import util.WeatherPredicate;
 import util.queries.LazyQueries;
-import weather.WeatherWebApi;
+import weather.WeatherService;
+import weather.data.WeatherWebApi;
+import weather.data.dto.LocationDto;
 import weather.model.Location;
-import weather.model.WeatherInfo;
 
-import java.time.LocalDate;
-import java.util.Comparator;
 import java.util.function.Function;
 
 import static java.lang.System.out;
@@ -31,7 +29,7 @@ public class App {
         Function<String, Iterable<String>> log = Loggify.of(req::getContent, "Requesting...");
         WeatherWebApi api = new WeatherWebApi(log::apply);
         out.println("Searching...");
-        Iterable<Location> locals = api.search("oporto");
+        Iterable<LocationDto> locals = api.search("oporto");
         out.println("Filtering...");
         locals = EagerQueries.filter(locals, l -> {out.println("filter...." + l); return l.getLatitude() > 0; });
         out.println("MApping...");
@@ -46,14 +44,16 @@ public class App {
          * "Requestin..."  --> msg
          */
         Function<String, Iterable<String>> log = Loggify.of(req::getContent, "Requesting...");
-        WeatherWebApi api = new WeatherWebApi(log::apply);
+        WeatherService api = new WeatherService(new WeatherWebApi(log::apply));
         out.println("Searching...");
         Iterable<Location> locals = api.search("oporto");
         out.println("Filtering...");
         locals = LazyQueries.filter(locals, l -> {out.println("filter...." + l); return l.getLatitude() > 0; });
-        out.println("MApping...");
-        Iterable<String> locs = LazyQueries.map(locals, l -> {out.println("map..." + l); return l.getRegion();});
-        out.println(locs.iterator().next());
+        Location loc = locals.iterator().next();
+        out.println(loc); // Print first LocationDto in north hemisphere
+
+        // Get the past weather for loc
+        loc.getLast30daysWeather().forEach(out::println);
     }
 }
 

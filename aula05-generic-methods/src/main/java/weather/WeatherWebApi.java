@@ -18,8 +18,8 @@
 package weather;
 
 import util.IRequest;
-import weather.model.Location;
-import weather.model.WeatherInfo;
+import weather.dto.Location;
+import weather.dto.WeatherInfo;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -39,7 +39,7 @@ import java.util.List;
 public class WeatherWebApi {
 
     private static final String WEATHER_TOKEN;
-    private static final String WEATHER_HOST = "http://api.worldweatheronline.com";
+    private static final String WEATHER_HOST = "http://data.worldweatheronline.com";
     private static final String WEATHER_PAST = "/premium/v1/past-weather.ashx";
     private static final String WEATHER_PAST_ARGS =
             "?q=%s&date=%s&enddate=%s&tp=24&format=csv&key=%s";

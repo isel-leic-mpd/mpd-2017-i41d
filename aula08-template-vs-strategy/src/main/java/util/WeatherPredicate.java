@@ -17,7 +17,7 @@
 
 package util;
 
-import weather.model.WeatherInfo;
+import weather.dto.WeatherInfo;
 
 /**
  * @author Miguel Gamboa
