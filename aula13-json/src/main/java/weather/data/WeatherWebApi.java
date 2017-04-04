@@ -17,8 +17,10 @@
 
 package weather.data;
 
+import com.google.gson.Gson;
 import util.IRequest;
 import weather.data.dto.LocationDto;
+import weather.data.dto.SearchDto;
 import weather.data.dto.WeatherInfoDto;
 
 import java.io.BufferedReader;
@@ -28,8 +30,10 @@ import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
 import java.net.URL;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.function.Predicate;
 
+import static java.util.Arrays.asList;
 import static util.queries.LazyQueries.*;
 
 /**
@@ -44,7 +48,7 @@ public class WeatherWebApi {
     private static final String WEATHER_PAST_ARGS =
             "?q=%s&date=%s&enddate=%s&tp=24&format=csv&key=%s";
     private static final String WEATHER_SEARCH="/premium/v1/search.ashx?query=%s";
-    private static final String WEATHER_SEARCH_ARGS="&format=tab&key=%s";
+    private static final String WEATHER_SEARCH_ARGS="&format=json&key=%s";
 
     static {
         try {
@@ -64,6 +68,7 @@ public class WeatherWebApi {
     }
 
     private final IRequest req;
+    private final Gson gson = new Gson();
 
     public WeatherWebApi(IRequest req) {
         this.req = req;
@@ -77,8 +82,8 @@ public class WeatherWebApi {
         String path = WEATHER_HOST + WEATHER_SEARCH + WEATHER_SEARCH_ARGS;
         String url = String.format(path, query, WEATHER_TOKEN);
         Iterable<String> content = () -> req.getContent(url).iterator();
-        Iterable<String> iterable =	filter(content, (String s) -> !s.startsWith("#"));
-        return map(iterable, LocationDto::valueOf);
+        SearchDto dto = gson.fromJson(join(content), SearchDto.class);
+        return asList(dto.search_api.result);
     }
 
     /**

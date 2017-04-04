@@ -60,4 +60,11 @@ public class LazyQueries {
     }
 
 
+    public static <T> String join(Iterable<T> src) {
+        String res = "";
+        for (T item: src) {
+            res += item.toString();
+        }
+        return res;
+    }
 }

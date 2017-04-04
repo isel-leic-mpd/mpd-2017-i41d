@@ -64,7 +64,7 @@ public class WeatherDomainTest {
         assertEquals(1, req.getCount());
         infos = filter(infos, info -> info.getDescription().toLowerCase().contains("sun"));
         assertEquals(1, req.getCount());
-        Iterable<Integer> temps = map(infos, info -> info.getTempC());
+        Iterable<Integer> temps = map(infos, WeatherInfo::getTempC);
         assertEquals(1, req.getCount());
         temps = distinct(temps);
         assertEquals(1, req.getCount());

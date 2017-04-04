@@ -22,12 +22,12 @@ package weather.data.dto;
  *         created on 07-03-2017
  */
 public class LocationDto {
-    private final String country;
-    private final String region;
+    private final ContainerDto[] country;
+    private final ContainerDto[] region;
     private final double latitude;
     private final double longitude;
 
-    public LocationDto(String country, String region, double latitude, double longitude) {
+    public LocationDto(ContainerDto[] country, ContainerDto[] region, double latitude, double longitude) {
         this.country = country;
         this.region = region;
         this.latitude = latitude;
@@ -35,11 +35,11 @@ public class LocationDto {
     }
 
     public String getCountry() {
-        return country;
+        return country[0].value;
     }
 
     public String getRegion() {
-        return region;
+        return region[0].value;
     }
 
     public double getLatitude() {
@@ -53,8 +53,8 @@ public class LocationDto {
     public static LocationDto valueOf(String line) {
         String[] data = line.split("\t");
         return new LocationDto(
-                data[1],
-                data[2],
+                ContainerDto.arrayOf(data[1]),
+                ContainerDto.arrayOf(data[2]),
                 Double.parseDouble(data[3]),
                 Double.parseDouble(data[4]));
     }
@@ -62,10 +62,28 @@ public class LocationDto {
     @Override
     public String toString() {
         return "LocationDto{" +
-                "country='" + country + '\'' +
-                ", region='" + region + '\'' +
+                "country='" + getCountry() + '\'' +
+                ", region='" + getRegion() + '\'' +
                 ", latitude=" + latitude +
                 ", longitude=" + longitude +
                 '}';
+    }
+
+    static class ContainerDto {
+        final String value;
+
+        public ContainerDto(String value) {
+            this.value = value;
+        }
+
+        @Override
+        public String toString() {
+            return value;
+        }
+
+        public static ContainerDto[] arrayOf(String s) {
+            ContainerDto dto = new ContainerDto(s);
+            return new ContainerDto[]{dto};
+        }
     }
 }
