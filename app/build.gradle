@@ -12,7 +12,7 @@ repositories {
 }
 
 dependencies {
-    compile project(':aula10-domain-and-dtos')
+    compile project(':aula13-json')
 
     // Use JUnit test framework
     testCompile 'junit:junit:4.12'
