@@ -81,9 +81,11 @@ public class WeatherWebApi {
     public Iterable<LocationDto> search(String query) {
         String path = WEATHER_HOST + WEATHER_SEARCH + WEATHER_SEARCH_ARGS;
         String url = String.format(path, query, WEATHER_TOKEN);
-        Iterable<String> content = () -> req.getContent(url).iterator();
-        SearchDto dto = gson.fromJson(join(content), SearchDto.class);
-        return asList(dto.search_api.result);
+        return () -> {
+            String content = join(req.getContent(url)); // Iterable<String> --> String
+            SearchDto dto = gson.fromJson(content, SearchDto.class); // String ---> Dto
+            return asList(dto.search_api.result).iterator();
+        };
     }
 
     /**
