@@ -16,15 +16,18 @@
  */
 
 import org.junit.Test;
+import util.Cache;
 import util.Countify;
 import util.FileRequest;
 import util.ICounter;
 import weather.WeatherService;
+import weather.WeatherServiceCache;
 import weather.data.WeatherWebApi;
 import weather.model.Location;
 import weather.model.WeatherInfo;
 
 import java.time.LocalDate;
+import java.util.function.Function;
 
 import static java.lang.System.out;
 import static java.time.LocalDate.of;
@@ -41,7 +44,7 @@ import static util.queries.LazyQueries.skip;
  */
 public class WeatherDomainTest {
     @Test
-    public void testWeatherService(){
+    public void testWeatherServiceLazy(){
         /**
          * Arrange WeatherService --> WeatherWebApi --> Countify --> FileRequest
          */
@@ -53,19 +56,17 @@ public class WeatherDomainTest {
          */
         Iterable<Location> locals = api.search("Porto");
         assertEquals(0, req.getCount());
-        locals = filter(locals, l -> l.getLatitude() > 0 );
+        locals = filter(locals, l -> l.getLatitude() > 0 ); // Iterable<T> ---> Iterable<T>
         assertEquals(0, req.getCount());
         /**
-         * Counts 1 request when iterate to get the first Location
+         * Counts 1 request when iterates to get the first Location
          */
         Location loc = locals.iterator().next();
         assertEquals(1, req.getCount());
-        Iterable<WeatherInfo> infos = api.pastWeather(loc.getLatitude(), loc.getLongitude(), of(2017,02,01), of(2017,02,28));
+        Iterable<WeatherInfo> infos = loc.getPastWeather(of(2017,02,01), of(2017,02,28));
         assertEquals(1, req.getCount());
         infos = filter(infos, info -> info.getDescription().toLowerCase().contains("sun"));
-        assertEquals(1, req.getCount());
         Iterable<Integer> temps = map(infos, WeatherInfo::getTempC);
-        assertEquals(1, req.getCount());
         temps = distinct(temps);
         assertEquals(1, req.getCount());
         /**
@@ -77,5 +78,62 @@ public class WeatherDomainTest {
         assertEquals(3, req.getCount());
         temps.forEach(System.out::println); // iterates all items
         assertEquals(4, req.getCount());
+    }
+
+    @Test
+    public void testWeatherServiceLazyAndCache(){
+        /**
+         * Arrange WeatherService --> WeatherWebApi --> Countify --> FileRequest
+         */
+        ICounter<String, Iterable<String>> req = Countify.of(new FileRequest()::getContent);
+        // Function<String, Iterable<String>> cache = Cache.memoize(req);
+        WeatherService api = new WeatherServiceCache(new WeatherWebApi(req::apply));
+        /**
+         * Act and Assert
+         * Counts 0 request while iterator() is not consumed
+         */
+        Iterable<Location> locals = api.search("Porto");
+        assertEquals(0, req.getCount());
+        locals = filter(locals, l -> l.getLatitude() > 0 ); // Iterable<T> ---> Iterable<T>
+        assertEquals(0, req.getCount());
+        /**
+         * Counts 1 request when iterates to get the first Location
+         */
+        Location loc = locals.iterator().next();
+        assertEquals(1, req.getCount());
+        Iterable<WeatherInfo> infos = loc.getPastWeather(of(2017,02,01), of(2017,02,28));
+        assertEquals(1, req.getCount());
+        infos = filter(infos, info ->
+                info.getDescription().toLowerCase().contains("sun"));
+        Iterable<Integer> temps = map(infos, WeatherInfo::getTempC);
+        temps = distinct(temps);
+        assertEquals(1, req.getCount());
+        /**
+         * When we iterate over the pastWeather then we make one more request
+         */
+        assertEquals(5, count(temps)); // iterates all items
+        assertEquals(2, req.getCount());
+        assertEquals((long) 21, (long) skip(temps, 2).iterator().next()); // another iterator
+        assertEquals(2, req.getCount());
+        temps.forEach(System.out::println); // iterates all items
+        assertEquals(2, req.getCount());
+        /**
+         * getting a sub-interval of past weather should return from cache
+         */
+        infos = loc.getPastWeather(of(2017,02,05), of(2017,02,18));
+        infos.iterator().next();
+        assertEquals(2, req.getCount());
+        /**
+         * getting a new interval gets from IO
+         */
+        infos = loc.getPastWeather(of(2017,02,15), of(2017,03,15));
+        infos.forEach((item) -> {}); // Consume all to add all itens in cache
+        assertEquals(3, req.getCount());
+        /**
+         * getting a sub-interval of past weather should return from cache
+         */
+        infos = loc.getPastWeather(of(2017,02,20), of(2017,03,10));
+        infos.iterator().next();
+        assertEquals(3, req.getCount());
     }
 }

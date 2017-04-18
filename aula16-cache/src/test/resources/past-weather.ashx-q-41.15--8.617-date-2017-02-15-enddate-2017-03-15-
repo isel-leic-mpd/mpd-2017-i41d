@@ -1,0 +1,66 @@
+#The CSV format is in following way:-
+#The day information is available in following format:-
+#date,maxtempC,maxtempF,mintempC,mintempF,sunrise,sunset,moonrise,moonset
+#
+#Hourly information follows below the day in the following way:-
+#date,time,tempC,tempF,windspeedMiles,windspeedKmph,winddirdegree,winddir16point,weatherCode,weatherIconUrl,weatherDesc,precipMM,humidity,visibilityKm,pressureMB,cloudcover,HeatIndexC,HeatIndexF,DewPointC,DewPointF,WindChillC,WindChillF,WindGustMiles,WindGustKmph,FeelsLikeC,FeelsLikeF
+#
+Not Available
+2017-02-15,17,62,11,52,08:29 AM,07:09 PM,11:55 PM,10:54 AM
+2017-02-15,24,17,62,6,9,84,E,116,http://cdn.worldweatheronline.net/images/wsymbols01_png_64/wsymbol_0002_sunny_intervals.png,Partly cloudy,0.3,83,10,1027,30,13,55,10,50,12,54,10,15,12,54
+2017-02-16,20,67,11,51,08:27 AM,07:10 PM,No moonrise,11:25 AM
+2017-02-16,24,20,67,5,8,208,SSW,113,http://cdn.worldweatheronline.net/images/wsymbols01_png_64/wsymbol_0001_sunny.png,Sunny,0.0,76,10,1029,7,15,59,10,50,14,57,9,14,14,57
+2017-02-17,19,66,12,54,08:26 AM,07:11 PM,12:53 AM,11:56 AM
+2017-02-17,24,19,66,4,6,228,SW,119,http://cdn.worldweatheronline.net/images/wsymbols01_png_64/wsymbol_0003_white_cloud.png,Cloudy,0.0,77,10,1028,14,14,57,10,50,14,57,6,9,14,57
+2017-02-18,15,59,9,47,08:25 AM,07:13 PM,01:49 AM,12:29 PM
+2017-02-18,24,15,59,6,10,331,NNW,176,http://cdn.worldweatheronline.net/images/wsymbols01_png_64/wsymbol_0009_light_rain_showers.png,Patchy rain possible,2.6,85,10,1024,42,12,53,9,48,11,52,9,14,11,52
+2017-02-19,16,62,9,47,08:23 AM,07:14 PM,02:45 AM,01:06 PM
+2017-02-19,24,16,62,8,13,119,ESE,113,http://cdn.worldweatheronline.net/images/wsymbols01_png_64/wsymbol_0001_sunny.png,Sunny,0.0,78,10,1024,5,12,53,8,46,10,50,13,20,10,50
+2017-02-20,20,68,10,51,08:22 AM,07:15 PM,03:39 AM,01:46 PM
+2017-02-20,24,20,68,6,10,37,NE,113,http://cdn.worldweatheronline.net/images/wsymbols01_png_64/wsymbol_0001_sunny.png,Sunny,0.0,74,10,1025,6,15,59,9,48,14,57,11,17,14,57
+2017-02-21,21,69,9,48,08:20 AM,07:16 PM,04:31 AM,02:31 PM
+2017-02-21,24,21,69,7,11,37,NE,113,http://cdn.worldweatheronline.net/images/wsymbols01_png_64/wsymbol_0001_sunny.png,Sunny,0.0,74,10,1022,7,14,57,9,48,13,55,12,19,13,55
+2017-02-22,21,69,10,50,08:19 AM,07:17 PM,05:21 AM,03:22 PM
+2017-02-22,24,21,69,5,9,197,SSW,113,http://cdn.worldweatheronline.net/images/wsymbols01_png_64/wsymbol_0001_sunny.png,Sunny,0.0,77,10,1019,7,16,60,10,49,14,58,10,16,14,58
+2017-02-23,18,65,10,49,08:18 AM,07:19 PM,06:08 AM,04:17 PM
+2017-02-23,24,18,65,8,12,342,NNW,122,http://cdn.worldweatheronline.net/images/wsymbols01_png_64/wsymbol_0004_black_low_cloud.png,Overcast,0.0,82,10,1016,43,14,56,11,51,13,55,12,19,13,55
+2017-02-24,18,64,10,49,08:16 AM,07:20 PM,06:51 AM,05:16 PM
+2017-02-24,24,18,64,6,10,176,S,113,http://cdn.worldweatheronline.net/images/wsymbols01_png_64/wsymbol_0001_sunny.png,Sunny,0.0,82,10,1017,22,13,56,10,50,13,55,11,17,13,55
+2017-02-25,17,63,10,50,08:15 AM,07:21 PM,07:31 AM,06:19 PM
+2017-02-25,24,17,63,5,8,238,WSW,113,http://cdn.worldweatheronline.net/images/wsymbols01_png_64/wsymbol_0001_sunny.png,Sunny,0.0,79,10,1021,10,13,55,9,48,12,54,8,13,12,54
+2017-02-26,17,62,9,49,08:13 AM,07:22 PM,08:09 AM,07:25 PM
+2017-02-26,24,17,62,4,6,216,SW,353,http://cdn.worldweatheronline.net/images/wsymbols01_png_64/wsymbol_0009_light_rain_showers.png,Light rain shower,0.5,88,10,1022,61,12,54,10,51,12,54,6,9,12,54
+2017-02-27,14,57,12,53,08:12 AM,07:23 PM,08:44 AM,08:32 PM
+2017-02-27,24,14,57,10,17,247,WSW,353,http://cdn.worldweatheronline.net/images/wsymbols01_png_64/wsymbol_0009_light_rain_showers.png,Light rain shower,3.0,86,7,1018,90,13,55,10,51,11,52,14,23,11,52
+2017-02-28,13,55,12,53,08:10 AM,07:25 PM,09:19 AM,09:40 PM
+2017-02-28,24,13,55,10,16,268,W,353,http://cdn.worldweatheronline.net/images/wsymbols01_png_64/wsymbol_0009_light_rain_showers.png,Light rain shower,2.1,86,5,1018,100,12,54,10,50,11,51,15,24,11,51
+2017-03-01,14,57,11,53,08:09 AM,07:26 PM,09:53 AM,10:49 PM
+2017-03-01,24,14,57,8,12,202,SSW,353,http://cdn.worldweatheronline.net/images/wsymbols01_png_64/wsymbol_0009_light_rain_showers.png,Light rain shower,1.9,89,10,1020,96,13,55,11,52,12,53,11,17,12,53
+2017-03-02,17,62,11,51,08:07 AM,07:27 PM,10:29 AM,11:59 PM
+2017-03-02,24,17,62,9,14,190,S,176,http://cdn.worldweatheronline.net/images/wsymbols01_png_64/wsymbol_0009_light_rain_showers.png,Patchy rain possible,0.4,87,10,1018,84,14,57,11,53,13,55,11,18,13,55
+2017-03-03,11,52,8,46,08:05 AM,07:28 PM,11:07 AM,No moonset
+2017-03-03,24,11,52,14,22,279,W,356,http://cdn.worldweatheronline.net/images/wsymbols01_png_64/wsymbol_0010_heavy_rain_showers.png,Moderate or heavy rain shower,26.5,83,8,1007,65,10,49,7,44,7,44,21,34,7,44
+2017-03-04,11,51,8,46,08:04 AM,07:29 PM,11:49 AM,01:07 AM
+2017-03-04,24,11,51,6,10,216,SW,176,http://cdn.worldweatheronline.net/images/wsymbols01_png_64/wsymbol_0009_light_rain_showers.png,Patchy rain possible,1.8,76,10,1010,58,9,48,5,40,7,45,10,17,7,45
+2017-03-05,13,55,11,51,08:02 AM,07:30 PM,12:35 PM,02:14 AM
+2017-03-05,24,13,55,9,15,258,WSW,353,http://cdn.worldweatheronline.net/images/wsymbols01_png_64/wsymbol_0009_light_rain_showers.png,Light rain shower,8.8,96,7,1019,99,11,53,11,51,10,50,18,28,10,50
+2017-03-06,15,60,10,51,08:01 AM,07:31 PM,01:28 PM,03:19 AM
+2017-03-06,24,15,60,6,10,291,WNW,353,http://cdn.worldweatheronline.net/images/wsymbols01_png_64/wsymbol_0009_light_rain_showers.png,Light rain shower,1.9,96,4,1027,82,13,55,12,54,12,53,12,19,12,53
+2017-03-07,18,65,12,53,07:59 AM,07:33 PM,02:24 PM,04:18 AM
+2017-03-07,24,18,65,4,6,277,W,122,http://cdn.worldweatheronline.net/images/wsymbols01_png_64/wsymbol_0004_black_low_cloud.png,Overcast,0.4,91,7,1030,62,14,57,13,55,14,57,6,10,14,57
+2017-03-08,22,72,11,51,07:58 AM,07:34 PM,03:26 PM,05:12 AM
+2017-03-08,24,22,72,5,9,262,W,113,http://cdn.worldweatheronline.net/images/wsymbols01_png_64/wsymbol_0001_sunny.png,Sunny,0.0,82,9,1027,9,16,61,12,54,15,59,9,14,15,59
+2017-03-09,26,79,14,57,07:56 AM,07:35 PM,04:29 PM,05:59 AM
+2017-03-09,24,26,79,4,6,223,SW,113,http://cdn.worldweatheronline.net/images/wsymbols01_png_64/wsymbol_0001_sunny.png,Sunny,0.0,70,10,1024,0,20,68,13,56,19,66,6,10,19,66
+2017-03-10,24,76,15,59,07:54 AM,07:36 PM,05:34 PM,06:41 AM
+2017-03-10,24,24,76,5,8,207,SSW,113,http://cdn.worldweatheronline.net/images/wsymbols01_png_64/wsymbol_0001_sunny.png,Sunny,0.0,69,10,1021,6,19,66,12,54,18,65,8,13,18,65
+2017-03-11,15,60,13,56,07:53 AM,07:37 PM,06:38 PM,07:18 AM
+2017-03-11,24,15,60,8,13,324,NW,176,http://cdn.worldweatheronline.net/images/wsymbols01_png_64/wsymbol_0009_light_rain_showers.png,Patchy rain possible,0.4,88,8,1022,66,14,57,12,54,13,56,12,19,13,56
+2017-03-12,14,57,11,53,07:51 AM,07:38 PM,07:41 PM,07:52 AM
+2017-03-12,24,14,57,13,22,344,NNW,176,http://cdn.worldweatheronline.net/images/wsymbols01_png_64/wsymbol_0009_light_rain_showers.png,Patchy rain possible,0.3,76,10,1027,26,12,53,8,46,10,50,19,31,10,50
+2017-03-13,16,60,8,46,07:50 AM,07:39 PM,08:42 PM,08:23 AM
+2017-03-13,24,16,60,13,21,179,S,113,http://cdn.worldweatheronline.net/images/wsymbols01_png_64/wsymbol_0001_sunny.png,Sunny,0.0,67,10,1028,4,11,52,5,41,9,48,20,32,9,48
+2017-03-14,21,69,10,50,07:48 AM,07:40 PM,09:42 PM,08:53 AM
+2017-03-14,24,21,69,11,18,46,NE,113,http://cdn.worldweatheronline.net/images/wsymbols01_png_64/wsymbol_0001_sunny.png,Sunny,0.0,65,10,1026,4,14,58,8,46,13,55,18,30,13,55
+2017-03-15,25,77,11,52,07:46 AM,07:42 PM,10:40 PM,09:24 AM
+2017-03-15,24,25,77,6,10,126,SE,113,http://cdn.worldweatheronline.net/images/wsymbols01_png_64/wsymbol_0001_sunny.png,Sunny,0.0,66,10,1023,16,19,66,10,50,17,63,11,18,17,63

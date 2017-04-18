@@ -17,11 +17,14 @@
 
 package util.queries;
 
-import java.util.ArrayList;
+import java.time.LocalDate;
+import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
+import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.UnaryOperator;
 
 /**
  * @author Miguel Gamboa
@@ -66,5 +69,52 @@ public class LazyQueries {
             res += item.toString();
         }
         return res;
+    }
+
+    public static <T> Iterable<T> peek(Iterable<T> src, Consumer<T> action) {
+        return () -> new Iterator<T>() {
+            final Iterator<T> iter = src.iterator();
+            @Override
+            public boolean hasNext() {
+                return iter.hasNext();
+            }
+
+            @Override
+            public T next() {
+                T curr = iter.next();
+                action.accept(curr);
+                return curr;
+            }
+        };
+    }
+
+    public static <T> Iterable<T> iterate(T from, T to, UnaryOperator<T> inc) {
+        return () -> new Iterator<T>() {
+            T next = from;
+            boolean finish = false;
+
+            @Override
+            public boolean hasNext() {
+                return !finish;
+            }
+
+            @Override
+            public T next() {
+                if(finish) throw new IndexOutOfBoundsException("Iteration overlaps the value of to: " + to);
+                if(next.equals(to))
+                    finish = true; // The to bound is inclusive. Finishes on next step.
+                T curr = next;
+                next = inc.apply(curr);
+                return curr;
+            }
+        };
+    }
+
+    public static <T> boolean containsAll(Collection<T> col, Iterable<T> data) {
+        for (T item:data) {
+            if(!col.contains(item))
+                return false;
+        }
+        return true;
     }
 }
