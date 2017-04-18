@@ -16,11 +16,11 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" scope="TEST" name="Gradle: junit:junit:4.12" level="project" />
     <orderEntry type="library" scope="TEST" name="Gradle: org.hamcrest:hamcrest-core:1.3" level="project" />
-    <orderEntry type="module" module-name="aula13-json" scope="PROVIDED" />
-    <orderEntry type="module" module-name="aula13-json" scope="RUNTIME" />
-    <orderEntry type="module" module-name="aula13-json" scope="TEST" />
     <orderEntry type="library" scope="PROVIDED" name="Gradle: com.google.code.gson:gson:2.8.0" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Gradle: com.google.code.gson:gson:2.8.0" level="project" />
     <orderEntry type="library" scope="TEST" name="Gradle: com.google.code.gson:gson:2.8.0" level="project" />
+    <orderEntry type="module" module-name="aula16-cache" scope="PROVIDED" />
+    <orderEntry type="module" module-name="aula16-cache" scope="RUNTIME" />
+    <orderEntry type="module" module-name="aula16-cache" scope="TEST" />
   </component>
 </module>

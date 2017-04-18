@@ -12,7 +12,7 @@ repositories {
 }
 
 dependencies {
-    compile project(':aula13-json')
+    compile project(':aula16-cache')
 
     // Use JUnit test framework
     testCompile 'junit:junit:4.12'
