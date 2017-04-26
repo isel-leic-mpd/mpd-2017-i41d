@@ -16,18 +16,24 @@
  */
 
 import org.junit.Test;
+import util.Comparators;
 import util.Countify;
 import util.FileRequest;
 import util.ICounter;
+import util.queries.LazyQueries;
 import weather.WeatherService;
 import weather.data.WeatherWebApi;
 import weather.data.dto.WeatherInfoDto;
 import weather.model.WeatherInfo;
 
 import java.time.LocalDate;
+import java.util.Comparator;
+import java.util.function.Function;
 
 import static java.time.LocalDate.of;
 import static org.junit.Assert.assertEquals;
+import static util.Comparators.*;
+import static util.Comparators.comparing;
 import static util.queries.LazyQueries.*;
 
 /**
@@ -62,9 +68,15 @@ public class LazyQueriesTest {
         WeatherService api = new WeatherService(new WeatherWebApi(new FileRequest()));
         Iterable<WeatherInfo> infos = api
                 .pastWeather(41.15, -8.6167, of(2017, 02, 01), of(2017, 02, 28));
-        WeatherInfo maxTemp = max(infos, (w1, w2) -> w1.getFeelsLikeC() - w2.getFeelsLikeC());
+        WeatherInfo maxTemp = max(infos, comparing(WeatherInfo::getFeelsLikeC));
         assertEquals(14, maxTemp.getFeelsLikeC());
-        maxTemp = max(infos, (w1, w2) -> w1.getTempC() - w2.getTempC());
+        maxTemp = max(infos, comparing(WeatherInfo::getTempC).invert().invert());
         assertEquals(21, maxTemp.getTempC());
+        WeatherInfo minTemp = max(infos, comparing(WeatherInfo::getTempC).invert());
+        assertEquals(10.9, minTemp.getPrecipMM(), 0);
+        minTemp = max(
+                infos,
+                comparing(WeatherInfo::getTempC).invert().thenBy(WeatherInfo::getPrecipMM));
+        assertEquals(13.1, minTemp.getPrecipMM(), 0);
     }
 }
