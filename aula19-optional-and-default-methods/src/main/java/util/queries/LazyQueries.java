@@ -19,6 +19,7 @@ package util.queries;
 
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -116,5 +117,17 @@ public class LazyQueries {
                 return false;
         }
         return true;
+    }
+
+    public static <T> T max(Iterable<T> src, Comparator<T> cmp) {
+        Iterator<T> iter = src.iterator();
+        if(!iter.hasNext()) return null;
+        T first = iter.next();
+        while (iter.hasNext()) {
+            T curr = iter.next();
+            if(cmp.compare(curr, first) > 0)
+                first = curr;
+        }
+        return first;
     }
 }

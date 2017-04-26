@@ -19,11 +19,14 @@ import org.junit.Test;
 import util.Countify;
 import util.FileRequest;
 import util.ICounter;
+import weather.WeatherService;
 import weather.data.WeatherWebApi;
 import weather.data.dto.WeatherInfoDto;
+import weather.model.WeatherInfo;
 
 import java.time.LocalDate;
 
+import static java.time.LocalDate.of;
 import static org.junit.Assert.assertEquals;
 import static util.queries.LazyQueries.*;
 
@@ -37,7 +40,7 @@ public class LazyQueriesTest {
     public void testLazyFilterAndMapAndDistinct(){
         ICounter<String, Iterable<String>> req = Countify.of(new FileRequest()::getContent);
         WeatherWebApi api = new WeatherWebApi(req::apply);
-        Iterable<WeatherInfoDto> infos = api.pastWeather(41.15, -8.6167, LocalDate.of(2017,02,01),LocalDate.of(2017,02,28));
+        Iterable<WeatherInfoDto> infos = api.pastWeather(41.15, -8.6167, of(2017,02,01), of(2017,02,28));
         assertEquals(0, req.getCount());
         infos = filter(infos, info -> info.getDescription().toLowerCase().contains("sun"));
         assertEquals(0, req.getCount());
@@ -52,5 +55,16 @@ public class LazyQueriesTest {
         assertEquals(2, req.getCount());
         temps.forEach(System.out::println);
         assertEquals(3, req.getCount());
+    }
+
+    @Test
+    public void testMax() {
+        WeatherService api = new WeatherService(new WeatherWebApi(new FileRequest()));
+        Iterable<WeatherInfo> infos = api
+                .pastWeather(41.15, -8.6167, of(2017, 02, 01), of(2017, 02, 28));
+        WeatherInfo maxTemp = max(infos, (w1, w2) -> w1.getFeelsLikeC() - w2.getFeelsLikeC());
+        assertEquals(14, maxTemp.getFeelsLikeC());
+        maxTemp = max(infos, (w1, w2) -> w1.getTempC() - w2.getTempC());
+        assertEquals(21, maxTemp.getTempC());
     }
 }
