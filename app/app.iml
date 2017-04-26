@@ -19,8 +19,8 @@
     <orderEntry type="library" scope="PROVIDED" name="Gradle: com.google.code.gson:gson:2.8.0" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Gradle: com.google.code.gson:gson:2.8.0" level="project" />
     <orderEntry type="library" scope="TEST" name="Gradle: com.google.code.gson:gson:2.8.0" level="project" />
-    <orderEntry type="module" module-name="aula16-cache" scope="PROVIDED" />
-    <orderEntry type="module" module-name="aula16-cache" scope="RUNTIME" />
-    <orderEntry type="module" module-name="aula16-cache" scope="TEST" />
+    <orderEntry type="module" module-name="aula19-optional-and-default-methods" scope="PROVIDED" />
+    <orderEntry type="module" module-name="aula19-optional-and-default-methods" scope="RUNTIME" />
+    <orderEntry type="module" module-name="aula19-optional-and-default-methods" scope="TEST" />
   </component>
 </module>
