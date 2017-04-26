@@ -21,6 +21,7 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -119,15 +120,15 @@ public class LazyQueries {
         return true;
     }
 
-    public static <T> T max(Iterable<T> src, Comparator<T> cmp) {
+    public static <T> Optional<T> max(Iterable<T> src, Comparator<T> cmp) {
         Iterator<T> iter = src.iterator();
-        if(!iter.hasNext()) return null;
+        if(!iter.hasNext()) return Optional.empty();
         T first = iter.next();
         while (iter.hasNext()) {
             T curr = iter.next();
             if(cmp.compare(curr, first) > 0)
                 first = curr;
         }
-        return first;
+        return Optional.of(first);
     }
 }

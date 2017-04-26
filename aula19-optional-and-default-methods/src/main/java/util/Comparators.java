@@ -26,6 +26,29 @@ import java.util.function.Function;
  */
 public class Comparators {
     public static <T, R extends Comparable<R>> ComparatorBy<T> comparing(Function<T, R> prop) {
+        return (o1, o2) -> prop.apply(o1).compareTo(prop.apply(o2));
+    }
+
+    public interface ComparatorBy<T> extends Comparator<T> {
+
+        public default ComparatorBy<T> invert() {
+            return (o1, o2) -> compare(o2, o1);
+        }
+
+        public default <R extends Comparable<R>> ComparatorBy<T> thenBy(Function<T, R> prop) {
+            Comparator<T> then = Comparators.comparing(prop); // Comparador criado 1 x
+            return (o1, o2) -> {
+                int res = compare(o1, o2);
+                if(res != 0) return res;
+                return then.compare(o1, o2); // Captura da variável then
+            };
+        }
+    }
+}
+
+/*
+public class Comparators {
+    public static <T, R extends Comparable<R>> ComparatorBy<T> comparing(Function<T, R> prop) {
         Comparator<T> cmp = (o1, o2) -> prop.apply(o1).compareTo(prop.apply(o2));
         return new ComparatorBy<T>(cmp);
     }
@@ -56,3 +79,4 @@ public class Comparators {
         }
     }
 }
+*/
