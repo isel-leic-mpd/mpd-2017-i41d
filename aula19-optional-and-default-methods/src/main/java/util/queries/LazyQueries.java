@@ -131,4 +131,9 @@ public class LazyQueries {
         }
         return Optional.of(first);
     }
+
+    public static <T> Optional<T> find(Iterable<T> src, Predicate<T> eq) {
+        Iterator<T> it = filter(src, eq).iterator();
+        return it.hasNext()? Optional.of(it.next()) : Optional.empty();
+    }
 }
