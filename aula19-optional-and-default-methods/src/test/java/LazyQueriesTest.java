@@ -20,6 +20,7 @@ import util.Comparators;
 import util.Countify;
 import util.FileRequest;
 import util.ICounter;
+import util.PredicateBy;
 import util.queries.LazyQueries;
 import weather.WeatherService;
 import weather.data.WeatherWebApi;
@@ -30,11 +31,13 @@ import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 import static java.time.LocalDate.of;
 import static org.junit.Assert.assertEquals;
 import static util.Comparators.*;
 import static util.Comparators.comparing;
+import static util.PredicateBy.equalsBy;
 import static util.queries.LazyQueries.*;
 
 /**
@@ -80,5 +83,22 @@ public class LazyQueriesTest {
                 comparing(WeatherInfo::getTempC).invert().thenBy(WeatherInfo::getPrecipMM));
         assertEquals(13.1, minTemp.get().getPrecipMM(), 0);
         minTemp.ifPresent(System.out::println);
+    }
+
+    @Test
+    public void testFind() {
+        WeatherService api = new WeatherService(new WeatherWebApi(new FileRequest()));
+        Iterable<WeatherInfo> infos = api
+                .pastWeather(41.15, -8.6167, of(2017, 02, 01), of(2017, 02, 28));
+        Optional<WeatherInfo> weather = find(infos, equalsBy(WeatherInfo::getTempC, 20));
+        assertEquals(16, weather.get().getDate().getDayOfMonth());
+
+        weather = find(infos, equalsBy(WeatherInfo::getTempC, 20).not().not());
+        assertEquals(16, weather.get().getDate().getDayOfMonth());
+
+        Predicate<WeatherInfo> sunnyAnd20degrees =
+                equalsBy(WeatherInfo::getDescription, "Sunny")
+                    .and(equalsBy(WeatherInfo::getTempC, 20));
+        assertEquals(16, find(infos, sunnyAnd20degrees).get().getDate().getDayOfMonth());
     }
 }

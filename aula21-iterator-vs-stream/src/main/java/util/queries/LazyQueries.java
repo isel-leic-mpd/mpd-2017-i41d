@@ -132,8 +132,7 @@ public class LazyQueries {
         return Optional.of(first);
     }
 
-    public static <T> Optional<T> find(Iterable<T> src, Predicate<T> eq) {
-        Iterator<T> it = filter(src, eq).iterator();
-        return it.hasNext()? Optional.of(it.next()) : Optional.empty();
+    public static <T extends Comparable<T>> Optional<T> max(Iterable<T> src) {
+        return max(src, (o1, o2) -> o1.compareTo(o2));
     }
 }
