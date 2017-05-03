@@ -12,7 +12,7 @@ repositories {
 }
 
 dependencies {
-    compile project(':aula19-optional-and-default-methods')
+    compile project(':aula21-iterator-vs-stream')
 
     // Use JUnit test framework
     testCompile 'junit:junit:4.12'

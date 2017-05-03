@@ -20,6 +20,7 @@ import util.Countify;
 import util.FileRequest;
 import util.ICounter;
 import util.IRequest;
+import util.queries.Queryable;
 import weather.data.WeatherWebApi;
 import weather.data.dto.WeatherInfoDto;
 
@@ -78,6 +79,30 @@ public class LazyQueriesTest {
          */
         Integer maxTemp = StreamSupport
                 .stream(data.spliterator(), false)
+                .filter(s -> !s.startsWith("#"))// Filter comments
+                .skip(1)                       //  Skip line: Not Available
+                .filter(isEvenLine)             // Filter even lines
+                .map(WeatherInfoDto::valueOf)
+                .map(WeatherInfoDto::getTempC)
+                .max(Integer::compare)
+                .get();
+        assertEquals(maxTemp.intValue(), 27);
+    }
+
+    @Test
+    public void testFileQueriesQueryable() {
+        /*
+         * Arange
+         */
+        int[] counter = {0};
+        Predicate<String> isEvenLine = item -> ++counter[0] % 2 == 0;
+        IRequest req = new FileRequest();
+        Iterable<String> data = req.getContent(path);
+        /*
+         * Act
+         */
+        Integer maxTemp = Queryable
+                .of(data)
                 .filter(s -> !s.startsWith("#"))// Filter comments
                 .skip(1)                       //  Skip line: Not Available
                 .filter(isEvenLine)             // Filter even lines

@@ -16,11 +16,8 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" scope="TEST" name="Gradle: junit:junit:4.12" level="project" />
     <orderEntry type="library" scope="TEST" name="Gradle: org.hamcrest:hamcrest-core:1.3" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Gradle: com.google.code.gson:gson:2.8.0" level="project" />
-    <orderEntry type="library" scope="RUNTIME" name="Gradle: com.google.code.gson:gson:2.8.0" level="project" />
-    <orderEntry type="library" scope="TEST" name="Gradle: com.google.code.gson:gson:2.8.0" level="project" />
-    <orderEntry type="module" module-name="aula19-optional-and-default-methods" scope="PROVIDED" />
-    <orderEntry type="module" module-name="aula19-optional-and-default-methods" scope="RUNTIME" />
-    <orderEntry type="module" module-name="aula19-optional-and-default-methods" scope="TEST" />
+    <orderEntry type="module" module-name="aula21-iterator-vs-stream" scope="PROVIDED" />
+    <orderEntry type="module" module-name="aula21-iterator-vs-stream" scope="RUNTIME" />
+    <orderEntry type="module" module-name="aula21-iterator-vs-stream" scope="TEST" />
   </component>
 </module>
