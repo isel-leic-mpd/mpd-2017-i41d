@@ -16,23 +16,25 @@
  */
 
 import org.junit.Test;
-import util.Countify;
 import util.FileRequest;
-import util.ICounter;
 import util.IRequest;
+import util.queries.LazyQueries;
 import util.queries.Queryable;
-import weather.data.WeatherWebApi;
+import util.queries.StreamUtils;
 import weather.data.dto.WeatherInfoDto;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import static java.util.Comparator.comparing;
 import static org.junit.Assert.assertEquals;
-import static util.queries.LazyQueries.*;
+import static util.queries.LazyQueries.filter;
+import static util.queries.LazyQueries.map;
+import static util.queries.LazyQueries.max;
+import static util.queries.LazyQueries.skip;
+import static util.queries.StreamUtils.filterEvenLine;
+import static util.queries.StreamUtils.distinct;
 
 /**
  * @author Miguel Gamboa
@@ -41,22 +43,15 @@ import static util.queries.LazyQueries.*;
 public class LazyQueriesTest {
 
     static final String path = "past-weather.ashx-q-41.15--8.6167-date-2017-02-01-enddate-2017-04-30";
+    IRequest req = new FileRequest();
 
     @Test
     public void testFileQueriesIterable() {
-        /*
-         * Arrange
-         */
-        int[] counter = {0};
-        Predicate<String> isEvenLine = item -> ++counter[0] % 2 == 0;
-        IRequest req = new FileRequest();
         Iterable<String> data = req.getContent(path);
-        /*
-         * Act
-         */
-        Iterable<String> lines = filter(data, s -> !s.startsWith("#")); // Filter comments
-        lines = skip(lines, 1);    //  Skip line: Not Available
-        lines = filter(lines, isEvenLine); // Filter even lines
+        Iterable<String> lines =
+                filter(data, s -> !s.startsWith("#")); // Filter comments
+        lines = skip(lines, 1);                        // Skip line: Not Available
+        lines = LazyQueries.filterEvenLine(lines);                 // Filter even lines
         Iterable<WeatherInfoDto> weather = map(lines, WeatherInfoDto::valueOf);
         Integer maxTemp = max(map(weather, WeatherInfoDto::getTempC)).get();
         /*
@@ -67,49 +62,53 @@ public class LazyQueriesTest {
 
     @Test
     public void testFileQueriesStream() {
-        /*
-         * Arange
-         */
-        int[] counter = {0};
-        Predicate<String> isEvenLine = item -> ++counter[0] % 2 == 0;
-        IRequest req = new FileRequest();
         Iterable<String> data = req.getContent(path);
-        /*
-         * Act
-         */
-        Integer maxTemp = StreamSupport
-                .stream(data.spliterator(), false)
+        Supplier<Stream<WeatherInfoDto>> weather = () ->
+                filterEvenLine(StreamSupport
+                    .stream(data.spliterator(), false)
+                    .filter(s -> !s.startsWith("#"))// Filter comments
+                    .skip(1)                        // Skip line: Not Available
+                )                                   // Filter even lines
+                .map(WeatherInfoDto::valueOf);
+        int maxTemp = weather.get()
+                .map(WeatherInfoDto::getTempC)
+                .max(Integer::compare)
+                .get();
+        long size = StreamUtils
+                .distinct(
+                    weather.get(),
+                    comparing(WeatherInfoDto::getTempC))
+                .count();
+        assertEquals(maxTemp, 27);
+        assertEquals(size, 18);
+    }
+
+    @Test
+    public void testFileQueriesQueryable() {
+        Iterable<String> data = req.getContent(path);
+        Integer maxTemp = Queryable
+                .of(data)
                 .filter(s -> !s.startsWith("#"))// Filter comments
                 .skip(1)                       //  Skip line: Not Available
-                .filter(isEvenLine)             // Filter even lines
+                .filterEvenLine()             // Filter even lines
                 .map(WeatherInfoDto::valueOf)
                 .map(WeatherInfoDto::getTempC)
                 .max(Integer::compare)
                 .get();
         assertEquals(maxTemp.intValue(), 27);
     }
-
     @Test
-    public void testFileQueriesQueryable() {
-        /*
-         * Arange
-         */
-        int[] counter = {0};
-        Predicate<String> isEvenLine = item -> ++counter[0] % 2 == 0;
-        IRequest req = new FileRequest();
+    public void testFileQueriesQueryableDistinct() {
         Iterable<String> data = req.getContent(path);
-        /*
-         * Act
-         */
-        Integer maxTemp = Queryable
+        int size = Queryable
                 .of(data)
                 .filter(s -> !s.startsWith("#"))// Filter comments
-                .skip(1)                       //  Skip line: Not Available
-                .filter(isEvenLine)             // Filter even lines
+                .skip(1)                        // Skip line: Not Available
+                .filterEvenLine()               // Filter even lines
                 .map(WeatherInfoDto::valueOf)
                 .map(WeatherInfoDto::getTempC)
-                .max(Integer::compare)
-                .get();
-        assertEquals(maxTemp.intValue(), 27);
+                .distinct()
+                .count();
+        assertEquals(size, 18);
     }
 }
