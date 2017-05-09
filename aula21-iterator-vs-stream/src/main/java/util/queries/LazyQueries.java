@@ -135,4 +135,23 @@ public class LazyQueries {
     public static <T extends Comparable<T>> Optional<T> max(Iterable<T> src) {
         return max(src, (o1, o2) -> o1.compareTo(o2));
     }
+
+    public static <T> Iterable<T> filterEvenLine(Iterable<T> src) {
+        Iterator<T> iter = src.iterator();
+        return () -> new Iterator<T>() {
+            @Override
+            public boolean hasNext() {
+                return iter.hasNext();
+            }
+
+            @Override
+            public T next() {
+                if(iter.hasNext()){
+                    iter.next();
+                    return iter.next();
+                }
+                throw new IndexOutOfBoundsException();
+            }
+        };
+    }
 }

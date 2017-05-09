@@ -20,6 +20,7 @@ package util.queries;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Optional;
@@ -80,10 +81,38 @@ public interface Queryable<T> {
     }
 
     default Optional<T> max(Comparator<T> cmp) {
-        return Optional.empty();
+        T[] max = (T[]) new Object[1];
+        while(tryAdvance(item->{
+            if(max[0]==null) max[0] = item;
+            if(cmp.compare(item,max[0])>0)
+                max[0] = item;
+        }));
+        return max[0]==null? Optional.empty(): Optional.of(max[0]);
     }
 
     default Queryable<T> distinct() {
-        throw new NotImplementedException();
+        ArrayList<T> distinctData = new ArrayList<>();
+        return action -> tryAdvance( item ->{
+            if(!distinctData.contains(item)){
+                distinctData.add(item);
+                action.accept(item);
+            }
+        });
+    }
+
+    default int count() {
+        int[] size = {0};
+        while(tryAdvance(item -> size[0]++)){}
+        return size[0];
+    }
+
+    default Queryable<T> filterEvenLine(){
+        /**
+         * Return an implementation of tryAdvance
+         */
+        return action -> {
+            if(!tryAdvance(item -> {})) return false;
+            return tryAdvance(action);
+        };
     }
 }
