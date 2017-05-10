@@ -15,13 +15,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package util.queries;
+package util;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Spliterator;
 import java.util.Spliterators.AbstractSpliterator;
-import java.util.TreeSet;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -48,29 +46,11 @@ public class StreamUtils {
     public static <T> Stream<T> distinct(Stream<T> src, Comparator<T> cmp) {
         Spliterator<T> iter = src.spliterator();
         Spliterator<T> res = new AbstractSpliterator<T>(Long.MAX_VALUE, Spliterator.ORDERED ) {
-            // ArrayList<T> distinctData = new ArrayList<>();
-            TreeSet<T> distinctData = new TreeSet<>(cmp);
             @Override
             public boolean tryAdvance(Consumer<? super T> action) {
-                return iter.tryAdvance( item -> {
-                    // Versão 1: if (!contains(distinctData, cmp, item)) {
-                    // Versão 2: if(!distinctData.stream().anyMatch(e -> cmp.compare(e, item) == 0)) {
-                    // Versão 3:
-                    if (!distinctData.contains(item)) {
-                        distinctData.add(item);
-                        action.accept(item);
-                    }
-                });
+                return false;
             }
         };
         return StreamSupport.stream(res, false);
-    }
-
-    private static <T> boolean contains(Iterable<T> data, Comparator<T> cmp, T item) {
-        for (T elem: data) {
-            if(cmp.compare(elem, item) == 0)
-                return true;
-        }
-        return false;
     }
 }
