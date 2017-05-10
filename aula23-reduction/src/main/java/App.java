@@ -33,6 +33,7 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static java.lang.System.out;
+import static java.util.Arrays.stream;
 import static util.StreamUtils.filterEvenLine;
 
 public class App {
@@ -41,15 +42,24 @@ public class App {
 
     public static void main(String[] args) throws URISyntaxException, IOException {
         Path p = Paths.get(ClassLoader.getSystemResource(SRC).toURI());
-        Stream<String> lines = Files.lines(p);
+        String[] lines = Files.lines(p).toArray(String[]::new);
 
-        filterEvenLine( lines
+        filterEvenLine( stream(lines)
                 .filter(s -> !s.startsWith("#"))// Filter comments
                 .skip(1)                        // Skip line: Not Available
             )                                   // Filter even lines
             .map(l -> l.substring(14, 16))      // Extract Temperature
-            .map(Integer::parseInt)
-            .max(Integer::compare)
+            .map(Integer::parseInt)             // Stream<Integer>
+            .max(Integer::compare)              // Optional<Integer>
+            .ifPresent(out::println);
+
+        filterEvenLine( stream(lines)
+                .filter(s -> !s.startsWith("#"))// Filter comments
+                .skip(1)                        // Skip line: Not Available
+            )                                   // Filter even lines
+            .map(l -> l.substring(14, 16))      // Extract Temperature
+            .mapToInt(Integer::parseInt)        // IntStream
+            .max()                              // OptionalInt
             .ifPresent(out::println);
     }
 }
