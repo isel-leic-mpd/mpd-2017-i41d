@@ -23,6 +23,7 @@ import util.queries.Queryable;
 import util.queries.StreamUtils;
 import weather.data.dto.WeatherInfoDto;
 
+import java.util.Arrays;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -63,20 +64,21 @@ public class LazyQueriesTest {
     @Test
     public void testFileQueriesStream() {
         Iterable<String> data = req.getContent(path);
-        Supplier<Stream<WeatherInfoDto>> weather = () ->
+        WeatherInfoDto[] weather =
                 filterEvenLine(StreamSupport
                     .stream(data.spliterator(), false)
                     .filter(s -> !s.startsWith("#"))// Filter comments
                     .skip(1)                        // Skip line: Not Available
                 )                                   // Filter even lines
-                .map(WeatherInfoDto::valueOf);
-        int maxTemp = weather.get()
+                .map(WeatherInfoDto::valueOf)
+                .toArray(WeatherInfoDto[]::new);
+        int maxTemp = Arrays.stream(weather)
                 .map(WeatherInfoDto::getTempC)
                 .max(Integer::compare)
                 .get();
         long size = StreamUtils
                 .distinct(
-                    weather.get(),
+                    Arrays.stream(weather),
                     comparing(WeatherInfoDto::getTempC))
                 .count();
         assertEquals(maxTemp, 27);
