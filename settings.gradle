@@ -2,4 +2,4 @@
 include 'app'
 include 'aula01'
 include 'aula21-iterator-vs-stream'
-include 'aula22-reduction'
+include 'aula23-reduction'
