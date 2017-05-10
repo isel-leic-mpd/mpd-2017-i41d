@@ -15,6 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import util.StreamUtils;
+
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
@@ -25,9 +27,13 @@ import java.util.Spliterator;
 import java.util.Spliterators.AbstractSpliterator;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+
+import static java.lang.System.out;
+import static util.StreamUtils.filterEvenLine;
 
 public class App {
 
@@ -35,6 +41,15 @@ public class App {
 
     public static void main(String[] args) throws URISyntaxException, IOException {
         Path p = Paths.get(ClassLoader.getSystemResource(SRC).toURI());
-        Files.lines(p);
+        Stream<String> lines = Files.lines(p);
+
+        filterEvenLine( lines
+                .filter(s -> !s.startsWith("#"))// Filter comments
+                .skip(1)                        // Skip line: Not Available
+            )                                   // Filter even lines
+            .map(l -> l.substring(14, 16))      // Extract Temperature
+            .map(Integer::parseInt)
+            .max(Integer::compare)
+            .ifPresent(out::println);
     }
 }
