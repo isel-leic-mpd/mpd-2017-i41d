@@ -32,18 +32,24 @@ public class App {
         // > o
         // > maior
 
+        /*
         Random r = new Random();
         IntStream
                 .generate(r::nextInt)
                 .limit(7)
                 .forEach(out::println);
-
-        fibonacci1().limit(9).forEach(nr -> out.print(nr + " "));
+        */
+        fibonacci1().limit(23).forEach(nr -> out.print(nr + " "));
+        System.out.println();
+        fibonacci2().limit(23).forEach(nr -> out.print(nr + " "));
         // > 0 1 1 2 3 5 8 13 21
     }
 
+    /**
+     * !!!!! Estado Mutavel  !!!! => Error prone
+     */
     private static IntStream fibonacci1() {
-        int[] nrs = {0, 1};
+        final int[] nrs = {0, 1}; // referência imutável
         return IntStream.generate(() -> {
             int tmp = nrs[1];
             nrs[1] = nrs[0] + nrs[1];
@@ -56,7 +62,24 @@ public class App {
         // 1. usar o iterate()
         // 2. Sem partilha de estado mutável
         // Dica: tem que criar uma classe Auxiliar
-        return null;
+        return Stream
+                .iterate(new Fibonacci(), Fibonacci::calculate)
+                .mapToInt(val-> val.second);
+    }
+
+    static class Fibonacci{
+        final int first, second;
+
+        public Fibonacci() {
+            this(0, 1);
+        }
+        public Fibonacci(int first,int second){
+            this.first = first;
+            this.second = second;
+        }
+        public Fibonacci calculate(){
+            return new Fibonacci(second,first + second);
+        }
     }
 
     private static <T> Stream<T> concat(Stream<T> first, Stream<T> second) {

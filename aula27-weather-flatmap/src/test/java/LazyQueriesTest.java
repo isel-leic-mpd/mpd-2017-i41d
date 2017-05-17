@@ -22,8 +22,10 @@ import util.ICounter;
 import weather.WeatherService;
 import weather.data.WeatherWebApi;
 import weather.data.dto.WeatherInfoDto;
+import weather.model.Location;
 import weather.model.WeatherInfo;
 
+import java.time.LocalDate;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -88,5 +90,31 @@ public class LazyQueriesTest {
                 equalsBy(WeatherInfo::getDescription, "Sunny")
                     .and(equalsBy(WeatherInfo::getTempC, 20));
         assertEquals(16, infos.get().filter(sunnyAnd20degrees).findFirst().get().getDate().getDayOfMonth());
+    }
+
+    @Test
+    public void testFlatMap() {
+        WeatherService api = new WeatherService(new WeatherWebApi(new FileRequest()));
+        int maxtTemp = api
+                .search("Lisbon")   // Stream<Location>
+                .findFirst().get()  // Location
+                .getPastWeather(    // Stream<WeatherInfo>
+                        LocalDate.of(2017, 04,01), LocalDate.of(2017, 04, 30))
+                .mapToInt(WeatherInfo::getTempC)   // IntStream
+                .max()                             // OptionalInt
+                .getAsInt();                       // int
+        assertEquals(30, maxtTemp);
+
+        Stream
+                .of("Lisbon", "Porto")             // Stream<String>
+                .map(api::search)                  // Stream<Stream<Location>>
+                .map(seq -> seq.findFirst().get()) // Stream<Location>
+                .map(loc -> loc.getPastWeather(    // Stream<Stream<WeatherInfo>>
+                        LocalDate.of(2017, 04,01), LocalDate.of(2017, 04, 30)))
+                .map(seq -> seq.mapToInt(WeatherInfo::getTempC)) // Stream<IntStream>>
+                .mapToInt(seq -> seq.max().getAsInt()) // IntStream
+                .max()                             // OptionalInt
+                .getAsInt();                       // int
+        assertEquals(30, maxtTemp);
     }
 }
