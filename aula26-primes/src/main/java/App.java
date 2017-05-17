@@ -20,20 +20,12 @@ import static java.util.Spliterator.ORDERED;
 public class App {
 
     public static void main(String[] args) {
-        Consumer<Integer> sout = nr -> System.out.print(nr + " ");
-        takeWhile(
-            Arrays.asList(2, 3, 5, 7, 11, 13, 17, 23),
-            nr -> nr < 8
-        ).forEach(sout);
-
-        primes(10, App::isPrimeOpt2).forEach(System.out::println);
-        /*
         for (int i = 0; i < 5; i++) {
             System.out.println("############################");
             System.out.println(measurePerformance(() -> primes(10000).count()));
             System.out.println(measurePerformance(() -> primes(10000, App::isPrimeOpt).count()));
             System.out.println(measurePerformance(() -> primes(10000, App::isPrimeOpt2).count()));
-        }*/
+        }
     }
 
     public static IntStream primes(int max) {
@@ -127,11 +119,11 @@ public class App {
             @Override
             public boolean tryAdvance(Consumer<? super T> action) {
                 if(hasNext)
-                    iter.tryAdvance(item -> {
+                    return iter.tryAdvance(item -> {
                         if(p.test(item)) action.accept(item);
                         else hasNext = false;
-                    });
-                return hasNext;
+                    }) && hasNext;
+                return false;
             }
         };
         return StreamSupport.stream(res, false);
