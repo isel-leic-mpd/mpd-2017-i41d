@@ -18,17 +18,40 @@
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class App {
     public static void main(String[] args) {
-        int[] nrs = Stream
-                .generate(Math::random)
-                .limit(1024)
-                .mapToInt(nr -> (int)(nr*100))
+        int[] nrs = IntStream
+                .range(0, 1024)
                 .toArray();
 
+        List<String> l = Arrays
+                .stream(nrs)             // IntStream
+                .mapToObj(Integer::new)  // Stream<Integer>
+                .map(Object::toString)   // Stream<String>
+                // .parallel()          // !!!!!!! EXCEPÇÃO => estado mutável
+                .reduce(
+                        new ArrayList<>(),
+                        (a, e) -> { a.add(e); return a;},
+                        (l1, l2) -> { l1.addAll(l2); return l1;}
+                );
+        System.out.println(l);
 
+        l = Arrays
+                .stream(nrs)             // IntStream
+                .mapToObj(Integer::new)  // Stream<Integer>
+                .map(Object::toString)   // Stream<String>
+                .parallel()
+                .collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
+                /*
+                .collect(
+                        () -> new ArrayList<>(),
+                        (a, e) -> a.add(e),
+                        (l1, l2) -> l1.addAll(l2)
+                );*/
+        System.out.println(l);
     }
 }

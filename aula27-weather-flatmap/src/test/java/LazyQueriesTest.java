@@ -93,28 +93,47 @@ public class LazyQueriesTest {
     }
 
     @Test
-    public void testFlatMap() {
+    public void testMaxTempInLisbonOnMarch() {
         WeatherService api = new WeatherService(new WeatherWebApi(new FileRequest()));
         int maxtTemp = api
                 .search("Lisbon")   // Stream<Location>
                 .findFirst().get()  // Location
                 .getPastWeather(    // Stream<WeatherInfo>
-                        LocalDate.of(2017, 04,01), LocalDate.of(2017, 04, 30))
+                        LocalDate.of(2017, 04, 01), LocalDate.of(2017, 04, 30))
                 .mapToInt(WeatherInfo::getTempC)   // IntStream
                 .max()                             // OptionalInt
                 .getAsInt();                       // int
         assertEquals(30, maxtTemp);
-
-        Stream
+    }
+    @Test
+    public void testMaxTempInLisbonAndPortoOnMarch() {
+        WeatherService api = new WeatherService(new WeatherWebApi(new FileRequest()));
+        int maxTemp = Stream
                 .of("Lisbon", "Porto")             // Stream<String>
                 .map(api::search)                  // Stream<Stream<Location>>
-                .map(seq -> seq.findFirst().get()) // Stream<Location>
+                .map(seq -> seq.findFirst().get()) // Stream<Location> [Lisbon, Porto]
                 .map(loc -> loc.getPastWeather(    // Stream<Stream<WeatherInfo>>
                         LocalDate.of(2017, 04,01), LocalDate.of(2017, 04, 30)))
                 .map(seq -> seq.mapToInt(WeatherInfo::getTempC)) // Stream<IntStream>>
                 .mapToInt(seq -> seq.max().getAsInt()) // IntStream
                 .max()                             // OptionalInt
                 .getAsInt();                       // int
-        assertEquals(30, maxtTemp);
+        assertEquals(30, maxTemp);
     }
+
+    @Test
+    public void testMaxTempInLisbonAndPortoOnMarchWithFlatMap() {
+        WeatherService api = new WeatherService(new WeatherWebApi(new FileRequest()));
+        int maxTemp = Stream
+                .of("Lisbon", "Porto")                          // Stream<String>
+                .flatMap(api::search)                           // Stream<Location>
+                .filter(l -> l.getCountry().equals("Portugal")) // Stream<Location>
+                .flatMap(loc -> loc.getPastWeather( // Stream<WeatherInfo>
+                        LocalDate.of(2017, 04,01), LocalDate.of(2017, 04, 30)))
+                .mapToInt(WeatherInfo::getTempC)    // IntStream>
+                .max()                              // OptionalInt
+                .getAsInt();                        // int
+        assertEquals(30, maxTemp);
+    }
+
 }
