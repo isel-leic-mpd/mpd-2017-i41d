@@ -26,12 +26,23 @@ import weather.model.Location;
 import weather.model.WeatherInfo;
 
 import java.time.LocalDate;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.time.LocalDate.of;
+import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.mapping;
+import static java.util.stream.Collectors.maxBy;
+import static java.util.stream.Collectors.minBy;
+import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.assertEquals;
 import static util.Comparators.comparing;
 import static util.PredicateBy.equalsBy;
@@ -43,10 +54,10 @@ import static util.PredicateBy.equalsBy;
 public class LazyQueriesTest {
 
     @Test
-    public void testLazyFilterAndMapAndDistinct(){
+    public void testLazyFilterAndMapAndDistinct() {
         ICounter<String, Stream<String>> req = Countify.of(new FileRequest()::getContent);
         WeatherWebApi api = new WeatherWebApi(req::apply);
-        Stream<WeatherInfoDto> infos = api.pastWeather(41.15, -8.6167, of(2017,02,01), of(2017,02,28));
+        Stream<WeatherInfoDto> infos = api.pastWeather(41.15, -8.6167, of(2017, 02, 01), of(2017, 02, 28));
         assertEquals(1, req.getCount());
         infos = infos.filter(info -> info.getDescription().toLowerCase().contains("sun"));
         assertEquals(1, req.getCount());
@@ -88,7 +99,7 @@ public class LazyQueriesTest {
 
         Predicate<WeatherInfo> sunnyAnd20degrees =
                 equalsBy(WeatherInfo::getDescription, "Sunny")
-                    .and(equalsBy(WeatherInfo::getTempC, 20));
+                        .and(equalsBy(WeatherInfo::getTempC, 20));
         assertEquals(16, infos.get().filter(sunnyAnd20degrees).findFirst().get().getDate().getDayOfMonth());
     }
 
@@ -105,6 +116,7 @@ public class LazyQueriesTest {
                 .getAsInt();                       // int
         assertEquals(30, maxtTemp);
     }
+
     @Test
     public void testMaxTempInLisbonAndPortoOnMarch() {
         WeatherService api = new WeatherService(new WeatherWebApi(new FileRequest()));
@@ -113,7 +125,7 @@ public class LazyQueriesTest {
                 .map(api::search)                  // Stream<Stream<Location>>
                 .map(seq -> seq.findFirst().get()) // Stream<Location> [Lisbon, Porto]
                 .map(loc -> loc.getPastWeather(    // Stream<Stream<WeatherInfo>>
-                        LocalDate.of(2017, 04,01), LocalDate.of(2017, 04, 30)))
+                        LocalDate.of(2017, 04, 01), LocalDate.of(2017, 04, 30)))
                 .map(seq -> seq.mapToInt(WeatherInfo::getTempC)) // Stream<IntStream>>
                 .mapToInt(seq -> seq.max().getAsInt()) // IntStream
                 .max()                             // OptionalInt
@@ -129,7 +141,7 @@ public class LazyQueriesTest {
                 .flatMap(api::search)                           // Stream<Location>
                 .filter(l -> l.getCountry().equals("Portugal")) // Stream<Location>
                 .flatMap(loc -> loc.getPastWeather( // Stream<WeatherInfo>
-                        LocalDate.of(2017, 04,01), LocalDate.of(2017, 04, 30)))
+                        LocalDate.of(2017, 04, 01), LocalDate.of(2017, 04, 30)))
                 .mapToInt(WeatherInfo::getTempC)    // IntStream>
                 .max()                              // OptionalInt
                 .getAsInt();                        // int
@@ -137,17 +149,43 @@ public class LazyQueriesTest {
     }
 
     @Test
-    public void testCollectInLisbonApril() {
+    public void testCollectLisbonAprilTempsToString() {
         WeatherService api = new WeatherService(new WeatherWebApi(new FileRequest()));
-        int maxTemp = api.search("Lisbon")
-                .filter(l -> l.getCountry().equals("Portugal")) // Stream<Location>
-                .flatMap(loc -> loc.getPastWeather( // Stream<WeatherInfo>
-                        LocalDate.of(2017, 04,01), LocalDate.of(2017, 04, 30)))
-                .mapToInt(WeatherInfo::getTempC)    // IntStream>
-                .max()                              // OptionalInt
-                .getAsInt();                        // int
-        assertEquals(30, maxTemp);
+        String temps = api.search("Lisbon")
+                .findFirst()
+                .get()
+                .getPastWeather(LocalDate.of(2017, 04, 01), LocalDate.of(2017, 04, 30))
+                .map(WeatherInfo::getTempC)
+                .map(Object::toString)
+                .distinct()
+                .sorted()
+                .collect(joining(","));
+        System.out.println(temps);
     }
 
+    @Test
+    public void testCollectLisbonAprilGroupByTemps() {
+        WeatherService api = new WeatherService(new WeatherWebApi(new FileRequest()));
+        Map<Integer, String> temps = api.search("Lisbon")
+                .findFirst()
+                .get()
+                .getPastWeather(LocalDate.of(2017, 04, 01), LocalDate.of(2017, 04, 30))
+                .collect(groupingBy(
+                        WeatherInfo::getTempC, // classifier
+                        mapping(w -> w.getDate().getDayOfMonth() + "", joining(","))));
+        temps.forEach((k, v) -> System.out.println(k + ": " + v));
+    }
 
+    @Test
+    public void testCollectLisbonAprilGroupByDescs() {
+        WeatherService api = new WeatherService(new WeatherWebApi(new FileRequest()));
+        api.search("Lisbon")
+                .findFirst()
+                .get()
+                .getPastWeather(LocalDate.of(2017, 04, 01), LocalDate.of(2017, 04, 30))
+                .collect(groupingBy(
+                        WeatherInfo::getDescription,
+                        mapping(w -> w.getTempC(), maxBy(Integer::compare))))
+                .forEach((k, v) -> System.out.println(k + ": " + v));
+    }
 }

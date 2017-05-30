@@ -16,20 +16,44 @@
  */
 
 import java.util.Random;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 class App{
 
     private static final Random random = new Random();
 
     public static void main(String [] args) throws Exception{
+        System.out.println("Requesting price for bag");
         System.out.println(calculatePrice("bag"));
+        System.out.println("Requesting price for tablet");
         System.out.println(calculatePrice("tablet"));
+
+        System.out.println("Requesting price for bag");
+        calculatePrice("bag", (price) -> System.out.println(price));
+        System.out.println("Requesting price for tablet");
+        calculatePrice("tablet", (price) -> System.out.println(price));
+
     }
 
     private static double calculatePrice(String product) {
         delay(3000);
         double res = random.nextDouble() * product.charAt(0) + product.charAt(1);
         return ((int) (res * 100)) / 100.0;
+    }
+
+    /**
+     * The callback is invoked when it finishes calculating the price.
+     */
+    private static void calculatePrice(String product, Consumer<Double> callback) {
+        // !!!!! CUIDADO não fazer isto
+        Thread th = new Thread(() -> {
+            delay(3000);
+            double res = random.nextDouble() * product.charAt(0) + product.charAt(1);
+            double price = ((int) (res * 100)) / 100.0;
+            callback.accept(price);
+        });
+        th.start();
     }
 
     private static void delay(long milis) {
