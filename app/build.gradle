@@ -12,7 +12,7 @@ repositories {
 }
 
 dependencies {
-    compile project(':aula21-iterator-vs-stream')
+    compile project(':aula31-weather-groupingBy')
 
     // Use JUnit test framework
     testCompile 'junit:junit:4.12'
