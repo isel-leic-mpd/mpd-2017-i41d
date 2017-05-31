@@ -12,7 +12,7 @@ repositories {
 }
 
 dependencies {
-    compile project(':aula31-weather-groupingBy')
+    compile project(':aula33-weather-async')
 
     // Use JUnit test framework
     testCompile 'junit:junit:4.12'
