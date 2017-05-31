@@ -39,6 +39,11 @@ public class Countify {
         }
 
         @Override
+        public void reset() {
+            count =0;
+        }
+
+        @Override
         public R apply(T arg) {
             count++;
             return inner.apply(arg);

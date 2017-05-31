@@ -25,6 +25,7 @@ import weather.data.WeatherWebApi;
 import weather.model.Location;
 import weather.model.WeatherInfo;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
 import static java.time.LocalDate.of;
@@ -40,28 +41,29 @@ public class WeatherDomainTest {
         /**
          * Arrange WeatherService --> WeatherWebApi --> Countify --> FileRequest
          */
-        ICounter<String, Stream<String>> req = Countify.of(new FileRequest()::getContent);
+        ICounter<String, CompletableFuture<Stream<String>>> req = Countify.of(new FileRequest()::getContent);
         WeatherService api = new WeatherService(new WeatherWebApi(req::apply));
         /**
          * Act and Assert
          */
-        Stream<Location> locals = api.search("Porto");
+        Stream<Location> locals = api.search("Porto").join();
         assertEquals(1, req.getCount());
         locals = locals.filter(l -> l.getLatitude() > 0 );
         assertEquals(1, req.getCount());
+        /**
+         * When we get the first item from Stream we are instantiating a new
+         * Location object and thus requesting its last 30 days past weather.
+         */
         Location loc = locals.findFirst().get();
-        assertEquals(1, req.getCount());
-        Stream<WeatherInfo> infos = loc.getPastWeather(of(2017,02,01), of(2017,02,28));
         assertEquals(2, req.getCount());
+        Stream<WeatherInfo> infos = loc.getPastWeather(of(2017,02,01), of(2017,02,28));
+        assertEquals(3, req.getCount());
         infos = infos.filter(info -> info.getDescription().toLowerCase().contains("sun"));
         Stream<Integer> temps = infos.map(WeatherInfo::getTempC);
         temps = temps.distinct();
-        assertEquals(2, req.getCount());
-        /**
-         * When we iterate over the pastWeather then we make one more request
-         */
+        assertEquals(3, req.getCount());
         assertEquals(5, temps.count()); // iterates all items
-        assertEquals(2, req.getCount());
+        assertEquals(3, req.getCount());
     }
 
     @Test
@@ -69,57 +71,65 @@ public class WeatherDomainTest {
         /**
          * Arrange WeatherService --> WeatherWebApi --> Countify --> FileRequest
          */
-        ICounter<String, Stream<String>> req = Countify.of(new FileRequest()::getContent);
+        ICounter<String, CompletableFuture<Stream<String>>> req = Countify.of(new FileRequest()::getContent);
         // Function<String, Iterable<String>> cache = Cache.memoize(req);
-        WeatherService api = new WeatherServiceCache(new WeatherWebApi(req::apply));
+        WeatherServiceCache api = new WeatherServiceCache(new WeatherWebApi(req::apply));
         /**
          * Act and Assert
          */
-        Stream<Location> locals = api.search("Porto");
+        Stream<Location> locals = api.search("Porto").join();
         assertEquals(1, req.getCount());
         locals = locals.filter(l -> l.getLatitude() > 0 );
         assertEquals(1, req.getCount());
         /**
-         * Counts 1 request when iterates to get the first Location
+         * Counts 2 request when iterates to get the first Location.
+         * Location requests last 30 days past weather asynchronously.
          */
         Location loc = locals.iterator().next();
-        assertEquals(1, req.getCount());
-        Stream<WeatherInfo> infos = loc.getPastWeather(of(2017,02,01), of(2017,02,28));
         assertEquals(2, req.getCount());
+        Stream<WeatherInfo> infos = loc.getPastWeather(of(2017,02,01), of(2017,02,28));
+        assertEquals(3, req.getCount());
         infos = infos.filter(info ->
                 info.getDescription().toLowerCase().contains("sun"));
         Stream<Integer> temps = infos.map(WeatherInfo::getTempC);
         temps = temps.distinct();
-        assertEquals(2, req.getCount());
-        /**
-         * When we iterate over the pastWeather then we make one more request
-         */
+        assertEquals(3, req.getCount());
         assertEquals(5, temps.count()); // iterates all items
-        assertEquals(2, req.getCount());
-        temps = api.search("Porto")
-                .findFirst().get()
+        assertEquals(3, req.getCount());
+        /**
+         * NOT caching Locations. Just cache for Past Weather.
+         * So, searching for Porto makes 2 more requests: 1 for Location and
+         * 1 more for last 30 days weather.
+         */
+        loc = api.search("Porto").join().findFirst().get();
+        assertEquals(5, req.getCount());
+        /**
+         * February past weather is already in cache for Porto.
+         * So, we will not make no more requests.
+         */
+        temps = loc
                 .getPastWeather(of(2017,02,01), of(2017,02,28))
                 .filter(info -> info.getDescription().toLowerCase().contains("sun"))
                 .map(WeatherInfo::getTempC);
         assertEquals((long) 20, (long) temps.skip(2).findFirst().get()); // another iterator
-        assertEquals(3, req.getCount());
+        assertEquals(5, req.getCount());
         /**
          * getting a sub-interval of past weather should return from cache
          */
         infos = loc.getPastWeather(of(2017,02,05), of(2017,02,18));
         infos.iterator().next();
-        assertEquals(3, req.getCount());
+        assertEquals(5, req.getCount());
         /**
          * getting a new interval gets from IO
          */
         infos = loc.getPastWeather(of(2017,02,15), of(2017,03,15));
         infos.forEach((item) -> {}); // Consume all to add all itens in cache
-        assertEquals(4, req.getCount());
+        assertEquals(6, req.getCount());
         /**
          * getting a sub-interval of past weather should return from cache
          */
         infos = loc.getPastWeather(of(2017,02,20), of(2017,03,10));
         infos.iterator().next();
-        assertEquals(4, req.getCount());
+        assertEquals(6, req.getCount());
     }
 }

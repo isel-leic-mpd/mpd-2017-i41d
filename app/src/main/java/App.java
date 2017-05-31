@@ -1,5 +1,9 @@
+import util.Countify;
 import util.HttpRequest;
+import util.ICounter;
+import util.IRequest;
 import weather.WeatherService;
+import weather.WeatherServiceCache;
 import weather.data.WeatherWebApi;
 import weather.model.Location;
 import weather.model.WeatherInfo;
@@ -7,7 +11,11 @@ import weather.model.WeatherInfo;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.joining;
@@ -17,36 +25,57 @@ import static java.util.stream.Collectors.joining;
  */
 public class App {
 
-    static final String path = "past-weather.ashx-q-41.15--8.6167-date-2017-02-01-enddate-2017-04-30";
-
-    public static void main(String[] args) {
-        WeatherService api = new WeatherService(new WeatherWebApi(new HttpRequest()));
+    public static void main(String[] args) throws Exception {
         Chrono chr = new Chrono();
-        List<String> cities = asList("Porto", "London", "Paris", "New%20York", "Barcelona");
-        cities
-                .stream()
-                .map(city -> api.search(city).findFirst().get())
-                .forEach(l -> System.out.println(l));
+        try(IRequest http = new HttpRequest()) {
+            ICounter<String, CompletableFuture<Stream<String>>> req = Countify.of(http::getContent);
+            WeatherService api = new WeatherServiceCache(new WeatherWebApi(req::apply));
+            List<String> cities = asList("Porto", "London", "Paris", "New%20York", "Barcelona");
+            System.out.println("####################################");
+            System.out.println("Warming Up....");
+            cities
+                    .stream()
+                    .map(city -> api.search(city).join().findFirst().get().getLast30daysWeather().findFirst().get())
+                    .forEach(l -> System.out.println(l));
 
-        for (int i = 0; i < 5 ; i++) {
+            req.reset();
             System.out.println("####################################");
             System.out.println("Getting Lisbon...");
             chr.start();
-            Location lis = api.search("Lisbon").findFirst().get();
+            Location lis = api.search("Lisbon").join().findFirst().get();
             System.out.println(lis);
             chr.elapsed();
-
-            System.out.println("Getting Lisbon past weather");
-            lis
+            System.out.println("2 requests: 1 for Location + 1 for last 30 days. #requests = " + req.getCount());
+            delay(500);
+            chr.start();
+            System.out.println("Getting Lisbon last 30 days temperatures");
+            String temps = lis
                     .getLast30daysWeather()
-                    .mapToInt(WeatherInfo::getTempC)
-                    .max()
-                    .ifPresent(t -> System.out.println("Max temp = " + t));
+                    .map(WeatherInfo::getTempC)
+                    .map(Object::toString)
+                    .collect(Collectors.joining(","));
+            System.out.println(temps);
             chr.elapsed();
+            System.out.println("No additional requests. #requests = " + req.getCount());
+
+            System.out.println("Getting Lisbon last 30 days AGAIN.... but now from cache...");
+            temps = lis
+                    .getLast30daysWeather()
+                    .map(WeatherInfo::getTempC)
+                    .map(Object::toString)
+                    .collect(Collectors.joining(","));
+            System.out.println(temps);
+            chr.elapsed();
+            System.out.println("No additional requests. #requests = " + req.getCount());
         }
-
     }
-
+    private static void delay(int ms) {
+        try {
+            Thread.sleep(ms);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
     static class Chrono {
         private long init;
         public void start() {

@@ -28,6 +28,7 @@ import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
 import java.net.URL;
 import java.time.LocalDate;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -35,7 +36,7 @@ import java.util.stream.Stream;
  * @author Miguel Gamboa
  *         created on 07-03-2017
  */
-public class WeatherWebApi {
+public class WeatherWebApi implements AutoCloseable{
 
     private static final String WEATHER_TOKEN;
     private static final String WEATHER_HOST = "http://api.worldweatheronline.com";
@@ -72,18 +73,19 @@ public class WeatherWebApi {
      * E.g. http://api.worldweatheronline.com/free/v2/search.ashx?query=oporto&format=tab&key=*****
      */
 
-    public Stream<LocationDto> search(String query) {
+    public CompletableFuture<Stream<LocationDto>> search(String query) {
         String path = WEATHER_HOST + WEATHER_SEARCH + WEATHER_SEARCH_ARGS;
         String url = String.format(path, query, WEATHER_TOKEN);
         return req.getContent(url)
-                .filter((String s) -> !s.startsWith("#"))
-                .map(LocationDto::valueOf);
+                .thenApply(str -> str
+                    .filter((String s) -> !s.startsWith("#"))
+                    .map(LocationDto::valueOf));
     }
 
     /**
      * E.g. http://api.worldweatheronline.com/free/v2/search.ashx?query=oporto&format=tab&key=*****
      */
-    public Stream<WeatherInfoDto> pastWeather(
+    public CompletableFuture<Stream<WeatherInfoDto>> pastWeather(
             double lat,
             double log,
             LocalDate from,
@@ -96,9 +98,15 @@ public class WeatherWebApi {
         Predicate<String> isEvenLine = item -> ++counter[0] % 2==0;
         return req
                 .getContent(path)
-                .filter(s->!s.startsWith("#"))
-                .skip(1)	                   // Skip line: Not Available
-                .filter(isEvenLine)            //even lines filter
-                .map(WeatherInfoDto::valueOf); //to weatherinfo objects
+                .thenApply(str -> str
+                    .filter(s->!s.startsWith("#"))
+                    .skip(1)	                   // Skip line: Not Available
+                    .filter(isEvenLine)            //even lines filter
+                    .map(WeatherInfoDto::valueOf)); //to weatherinfo objects
+    }
+
+    @Override
+    public void close() throws Exception {
+        req.close();
     }
 }

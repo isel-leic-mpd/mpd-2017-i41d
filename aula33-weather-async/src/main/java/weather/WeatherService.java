@@ -25,6 +25,7 @@ import weather.model.Location;
 import weather.model.WeatherInfo;
 
 import java.time.LocalDate;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
 import static java.time.LocalDate.now;
@@ -33,7 +34,7 @@ import static java.time.LocalDate.now;
  * @author Miguel Gamboa
  *         created on 29-03-2017
  */
-public class WeatherService {
+public class WeatherService implements AutoCloseable{
 
     private final WeatherWebApi api;
 
@@ -45,24 +46,24 @@ public class WeatherService {
         api = new WeatherWebApi(new HttpRequest());
     }
 
-    public Stream<Location> search(String query) {
-        return api.search(query).map(this::dtoToLocation);
+    public CompletableFuture<Stream<Location>> search(String query) {
+        return api.search(query)
+                .thenApply(str -> str
+                    .map(this::dtoToLocation));
     }
 
-    private Location dtoToLocation(LocationDto loc) {
+    protected Location dtoToLocation(LocationDto loc) {
         return new Location(
                 loc.getCountry(),
                 loc.getRegion(),
                 loc.getLatitude(),
                 loc.getLongitude(),
-                () -> last30daysWeather(loc.getLatitude(), loc.getLongitude()),
-                (from, to) -> pastWeather(loc.getLatitude(), loc.getLongitude(), from, to));
+                last30daysWeather(loc.getLatitude(), loc.getLongitude())::join,
+                (from, to) -> pastWeather(loc.getLatitude(), loc.getLongitude(), from, to).join());
     }
 
-    public Stream<WeatherInfo> last30daysWeather(double lat, double log) {
-        return api
-                .pastWeather(lat, log, now().minusDays(30), now().minusDays(1))
-                .map(WeatherService::dtoToWeatherInfo);
+    public CompletableFuture<Stream<WeatherInfo>> last30daysWeather(double lat, double log) {
+        return this.pastWeather(lat, log, now().minusDays(30), now().minusDays(1));
     }
 
     private static WeatherInfo dtoToWeatherInfo(WeatherInfoDto dto) {
@@ -74,9 +75,15 @@ public class WeatherService {
                 dto.getFeelsLikeC());
     }
 
-    public Stream<WeatherInfo> pastWeather(double lat, double log, LocalDate from, LocalDate to) {
+    public CompletableFuture<Stream<WeatherInfo>> pastWeather(double lat, double log, LocalDate from, LocalDate to) {
         return api
                 .pastWeather(lat, log, from, to)
-                .map(dto -> dtoToWeatherInfo(dto));
+                .thenApply(str -> str
+                    .map(dto -> dtoToWeatherInfo(dto)));
+    }
+
+    @Override
+    public void close() throws Exception {
+        api.close();
     }
 }

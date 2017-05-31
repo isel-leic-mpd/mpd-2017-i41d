@@ -17,12 +17,17 @@
 
 package util;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
 /**
  * @author Miguel Gamboa
  *         created on 08-03-2017
  */
-public interface IRequest {
-    Stream<String> getContent(String path);
+public interface IRequest extends AutoCloseable{
+    CompletableFuture<Stream<String>> getContent(String path);
+
+    @Override
+    public default void close() {
+    }
 }

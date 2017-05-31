@@ -16,6 +16,8 @@
  */
 
 import java.util.Random;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -24,16 +26,35 @@ class App{
     private static final Random random = new Random();
 
     public static void main(String [] args) throws Exception{
-        System.out.println("Requesting price for bag");
-        System.out.println(calculatePrice("bag"));
-        System.out.println("Requesting price for tablet");
-        System.out.println(calculatePrice("tablet"));
+        testCalculatePriceAsync();
+    }
 
+    private static void testCalculatePriceAsync() {
         System.out.println("Requesting price for bag");
-        calculatePrice("bag", (price) -> System.out.println(price));
+        calculatePriceAsync2("bag")
+                .thenAccept(System.out::println);
         System.out.println("Requesting price for tablet");
-        calculatePrice("tablet", (price) -> System.out.println(price));
+        calculatePriceAsync2("tablet")
+                .exceptionally(ex -> {
+                    System.out.println("Pelase get another product");
+                    return null;
+                })
+                .thenAccept(System.out::println)
+                .join();
+    }
 
+    private static void testCalculatePriceCallback() {
+        System.out.println("Requesting price for bag");
+        calculatePrice("bag", (err, price) -> System.out.println(price));
+        System.out.println("Requesting price for tablet");
+        calculatePrice("tablet", (err, price) -> {
+            if(err != null) {
+                System.out.println("Pelase get another product");
+            }
+            else
+                System.out.println(price);
+
+        });
     }
 
     private static double calculatePrice(String product) {
@@ -45,15 +66,41 @@ class App{
     /**
      * The callback is invoked when it finishes calculating the price.
      */
-    private static void calculatePrice(String product, Consumer<Double> callback) {
+    private static void calculatePrice(String product, BiConsumer<RuntimeException, Double> callback) {
         // !!!!! CUIDADO não fazer isto
         Thread th = new Thread(() -> {
             delay(3000);
+            if(product.length() > 4 ) callback.accept(new RuntimeException("Illegal Product " + product), null);
             double res = random.nextDouble() * product.charAt(0) + product.charAt(1);
             double price = ((int) (res * 100)) / 100.0;
-            callback.accept(price);
+            callback.accept(null, price);
         });
         th.start();
+    }
+
+    private static CompletableFuture<Double> calculatePriceAsync(String product) {
+        CompletableFuture<Double> promise = new CompletableFuture<>();
+        // !!!!! CUIDADO não fazer isto
+        new Thread(() -> {
+            delay(3000);
+            if(product.length() > 4 ) promise.completeExceptionally(new RuntimeException("Illegal Product " + product));
+            double res = random.nextDouble() * product.charAt(0) + product.charAt(1);
+            double price = ((int) (res * 100)) / 100.0;
+            promise.complete(price);
+        }).start();
+        return promise;
+    }
+
+
+    private static CompletableFuture<Double> calculatePriceAsync2(String product) {
+        CompletableFuture<Double> promise = CompletableFuture.supplyAsync(() -> {
+            delay(3000);
+            if(product.length() > 4 ) throw new RuntimeException("Illegal Product " + product);
+            double res = random.nextDouble() * product.charAt(0) + product.charAt(1);
+            double price = ((int) (res * 100)) / 100.0;
+            return price;
+        });
+        return promise;
     }
 
     private static void delay(long milis) {

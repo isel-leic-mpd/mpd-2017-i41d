@@ -9,6 +9,8 @@ repositories {
 }
 
 dependencies {
+    compile 'org.asynchttpclient:async-http-client:2.0.32'
+
     // Use JUnit test framework
     testImplementation 'junit:junit:4.12'
 }

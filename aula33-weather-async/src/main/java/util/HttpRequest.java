@@ -17,27 +17,46 @@
 
 package util;
 
+import org.asynchttpclient.AsyncHttpClient;
+import org.asynchttpclient.Dsl;
+import org.asynchttpclient.Response;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.net.URL;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+
+import static java.util.stream.StreamSupport.stream;
 
 /**
  * @author Miguel Gamboa
  *         created on 08-03-2017
  */
-public class HttpRequest extends Request {
+public class HttpRequest implements IRequest{
 
-    public HttpRequest() {
-        super(HttpRequest::getStream);
+    private final AsyncHttpClient asyncHttpClient = Dsl.asyncHttpClient();
+
+    @Override
+    public CompletableFuture<Stream<String>> getContent(String path) {
+        return asyncHttpClient
+                .prepareGet(path)
+                .execute()
+                .toCompletableFuture()
+                .thenApply(resp -> resp.getResponseBodyAsStream()) // <=> Stream::map
+                .thenApply(in -> stream(new IteratorFromReader(in), false));
     }
 
-    public static InputStream getStream(String path) {
-        try {
-            return new URL(path).openStream();
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+    @Override
+    public void close() {
+        if(!asyncHttpClient.isClosed())
+            try {
+                asyncHttpClient.close();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
     }
 }

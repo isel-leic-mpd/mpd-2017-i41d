@@ -20,18 +20,28 @@ package util;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
  * @author Miguel Gamboa
  *         created on 08-03-2017
  */
-public class FileRequest extends Request {
-    public FileRequest() {
-        super(FileRequest::getStream);
+public class FileRequest implements IRequest {
+
+    @Override
+    public CompletableFuture<Stream<String>> getContent(String path) {
+        return CompletableFuture.supplyAsync(() -> {
+            return getStream(path);
+        });
     }
 
-    public static InputStream getStream(String path) {
+    /**
+     * Sincrono
+     */
+    public static Stream<String> getStream(String path) {
         String[] parts = path.split("/");
         path = parts[parts.length-1]
                 .replace('?', '-')
@@ -40,9 +50,16 @@ public class FileRequest extends Request {
                 .replace(',', '-')
                 .substring(0,68);
         try {
-            return ClassLoader.getSystemResource(path).openStream();
+            InputStream in = ClassLoader.getSystemResource(path).openStream();
+            return StreamSupport.stream(new IteratorFromReader(in), false);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
+    }
+
+
+    @Override
+    public void close(){
+
     }
 }

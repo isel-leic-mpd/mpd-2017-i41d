@@ -18,6 +18,8 @@
 package weather;
 
 import weather.data.WeatherWebApi;
+import weather.data.dto.LocationDto;
+import weather.model.Location;
 import weather.model.WeatherInfo;
 
 import java.time.LocalDate;
@@ -26,6 +28,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -45,17 +49,55 @@ public class WeatherServiceCache extends WeatherService{
     private final Map<Coords, Map<LocalDate, WeatherInfo>> cache = new HashMap<>();
 
     @Override
-    public Stream<WeatherInfo> pastWeather(double lat, double log, LocalDate from, LocalDate to) {
+    protected Location dtoToLocation(LocationDto loc) {
+        return new Location(
+                loc.getCountry(),
+                loc.getRegion(),
+                loc.getLatitude(),
+                loc.getLongitude(),
+                last30daysWeatherSupplier(loc),
+                (from, to) -> pastWeather(loc.getLatitude(), loc.getLongitude(), from, to).join());
+    }
+
+    private Supplier<Stream<WeatherInfo>> last30daysWeatherSupplier(LocationDto loc) {
+        /**
+         * Immediately dispatch request for last 30 days weather asynchronously.
+         */
+        CompletableFuture<Stream<WeatherInfo>> promise =
+                last30daysWeather(loc.getLatitude(), loc.getLongitude());
+        boolean[] firstReq = { true };
+        /**
+         * The supplier returns the result of the promise on first get.
+         * Further invocations will call last30daysWeather() again which in turn
+         * calls the pastWeather() of this WeatherServiceCache, which gets past
+         * weather from cache.
+         */
+        return () -> {
+            Stream<WeatherInfo> res = firstReq[0]
+                    ? promise.join()
+                    : last30daysWeather(loc.getLatitude(), loc.getLongitude()).join(); // ALREADY on cache.
+            firstReq[0] = false;
+            return res;
+        };
+    }
+
+    @Override
+    public CompletableFuture<Stream<WeatherInfo>> pastWeather(double lat, double log, LocalDate from, LocalDate to) {
         Coords location = new Coords(lat, log);
         Map<LocalDate, WeatherInfo> past = getOrCreate(location, cache);
         List<LocalDate> keys = Stream
                 .iterate(from, prev -> prev.plusDays(1))
                 .limit(ChronoUnit.DAYS.between(from, to.plusDays(1)))
                 .collect(toList());
-        if (past.keySet().containsAll(keys)) return keys.stream().map(past::get);
-        Stream<WeatherInfo> values = super.pastWeather(lat, log, from, to);
+        if (past.keySet().containsAll(keys)) {
+            CompletableFuture<Stream<WeatherInfo>> res = new CompletableFuture<>();
+            res.complete(keys.stream().map(past::get));
+            return res;
+        }
+        CompletableFuture<Stream<WeatherInfo>> values = super.pastWeather(lat, log, from, to);
         Iterator<LocalDate> keysIter = keys.iterator();
-        return values.peek(item -> past.put(keysIter.next(), item));
+        return values.thenApply(vs -> vs
+                .peek(item -> past.put(keysIter.next(), item)));
     }
 
     private static Map<LocalDate, WeatherInfo> getOrCreate(
