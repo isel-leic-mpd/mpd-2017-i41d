@@ -1,0 +1,14 @@
+#The Search API
+#Data returned is laid out in the following order:-
+#AreaName    Country     Region(If available)    Latitude    Longitude   Population(if available)    Weather Forecast URL
+#
+Lisbon	Portugal	Lisboa	38.717	-9.133	517798	http://api.worldweatheronline.com/v2/weather.aspx?q=38.7167,-9.1333
+Lisbon	United States of America	Maine	44.031	-70.105	9392	http://api.worldweatheronline.com/v2/weather.aspx?q=44.0314,-70.105
+Lisbonne	Belgium		49.950	4.433	0	http://api.worldweatheronline.com/v2/weather.aspx?q=49.95,4.4333
+Lisbon Creek	Bahamas	Kemps Bay	24.217	-77.633	0	http://api.worldweatheronline.com/v2/weather.aspx?q=24.2167,-77.6333
+Lisbon Creek Settlement	Bahamas	Kemps Bay	24.217	-77.633	0	http://api.worldweatheronline.com/v2/weather.aspx?q=24.2167,-77.6333
+Lisbon	Peru	Loreto	-2.617	-76.100	0	http://api.worldweatheronline.com/v2/weather.aspx?q=-2.6167,-76.1
+Lisbon	United States of America	Louisiana	32.796	-92.865	0	http://api.worldweatheronline.com/v2/weather.aspx?q=32.7958,-92.865
+Lisbon Center	United States of America	Maine	44.020	-70.094	0	http://api.worldweatheronline.com/v2/weather.aspx?q=44.0197,-70.0939
+Lisbon Falls	United States of America	Maine	43.996	-70.061	0	http://api.worldweatheronline.com/v2/weather.aspx?q=43.9961,-70.0611
+Lisbon	United States of America	Iowa	41.921	-91.385	0	http://api.worldweatheronline.com/v2/weather.aspx?q=41.9211,-91.3853
