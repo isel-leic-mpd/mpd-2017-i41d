@@ -15,18 +15,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package weather.app;import util.HttpRequest;
-import util.IRequest;
-import weather.WeatherService;
-import weather.WeatherServiceCache;
-import weather.data.WeatherWebApi;
+package weather.app;
 
-import java.util.List;
+import org.eclipse.jetty.servlet.DefaultServlet;
+import org.eclipse.jetty.servlet.ServletHolder;
+import util.HttpServer;
 
-import static java.util.Arrays.asList;
+import static java.lang.ClassLoader.getSystemResource;
 
 public class WeatherWebApp {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
+        /*
         try(IRequest http = new HttpRequest()) {
             WeatherService api = new WeatherServiceCache(new WeatherWebApi(http));
             List<String> cities = asList("Porto", "London", "Paris", "New%20York", "Barcelona");
@@ -37,5 +36,18 @@ public class WeatherWebApp {
                     .map(city -> api.search(city).join().findFirst().get().getLast30daysWeather().findFirst().get())
                     .forEach(l -> System.out.println(l));
         }
+        */
+
+        ServletHolder holderHome = new ServletHolder("static-home", DefaultServlet.class);
+        String resPath = getSystemResource("public").toString();
+        holderHome.setInitParameter("resourceBase", resPath);
+        holderHome.setInitParameter("dirAllowed","true");
+        holderHome.setInitParameter("pathInfoOnly","true");
+
+        new HttpServer(3000)
+                .addHandler("/ole", req -> "<h1>Titulo</h1><p>Ola Mundo</p>")
+                .addHandler("/hello", req -> "<h1>Titulo</h1><p>Hello</p>")
+                .addServletHolder("/public/*", holderHome)
+                .run();
     }
 }
