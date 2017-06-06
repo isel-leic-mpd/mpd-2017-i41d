@@ -19,35 +19,34 @@ package weather.app;
 
 import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.servlet.ServletHolder;
+import util.HttpRequest;
 import util.HttpServer;
+import weather.WeatherService;
+import weather.WeatherServiceCache;
+import weather.controllers.WeatherController;
+import weather.data.WeatherWebApi;
 
 import static java.lang.ClassLoader.getSystemResource;
 
 public class WeatherWebApp {
     public static void main(String[] args) throws Exception {
-        /*
-        try(IRequest http = new HttpRequest()) {
-            WeatherService api = new WeatherServiceCache(new WeatherWebApi(http));
-            List<String> cities = asList("Porto", "London", "Paris", "New%20York", "Barcelona");
-            System.out.println("####################################");
-            System.out.println("Warming Up....");
-            cities
-                    .stream()
-                    .map(city -> api.search(city).join().findFirst().get().getLast30daysWeather().findFirst().get())
-                    .forEach(l -> System.out.println(l));
+        try(HttpRequest http = new HttpRequest()) {
+            WeatherService service = new WeatherServiceCache(new WeatherWebApi(http));
+            WeatherController weatherCtr = new WeatherController(service);
+
+            ServletHolder holderHome = new ServletHolder("static-home", DefaultServlet.class);
+            String resPath = getSystemResource("public").toString();
+            holderHome.setInitParameter("resourceBase", resPath);
+            holderHome.setInitParameter("dirAllowed", "true");
+            holderHome.setInitParameter("pathInfoOnly", "true");
+
+            int[] counter = {0};
+            new HttpServer(3000)
+                    .addHandler("/search", weatherCtr::getSearch)
+                    .addHandler("/search/city", weatherCtr::searchCity)
+                    .addHandler("/weather/*", weatherCtr::last30daysWeather)
+                    .addServletHolder("/public/*", holderHome)
+                    .run();
         }
-        */
-
-        ServletHolder holderHome = new ServletHolder("static-home", DefaultServlet.class);
-        String resPath = getSystemResource("public").toString();
-        holderHome.setInitParameter("resourceBase", resPath);
-        holderHome.setInitParameter("dirAllowed","true");
-        holderHome.setInitParameter("pathInfoOnly","true");
-
-        new HttpServer(3000)
-                .addHandler("/ole", req -> "<h1>Titulo</h1><p>Ola Mundo</p>")
-                .addHandler("/hello", req -> "<h1>Titulo</h1><p>Hello</p>")
-                .addServletHolder("/public/*", holderHome)
-                .run();
     }
 }
