@@ -21,6 +21,7 @@ import weather.WeatherService;
 import weather.model.Location;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URI;
@@ -28,18 +29,20 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-import static java.nio.file.Files.*;
+import static java.lang.ClassLoader.getSystemResource;
+import static java.nio.file.Files.lines;
 
 /**
  * @author Miguel Gamboa
  *         created on 06-06-2017
  */
 public class WeatherController {
+
+    private final String root;
 
     private final WeatherService api;
     private final String getSearchView = load("views/search.html");
@@ -48,17 +51,16 @@ public class WeatherController {
     private final String weather = load("views/weather.html");
     private final String weatherRow = load("views/weatherRow.html");
 
-    static final class LatLog {
-        final double lat, log;
-        public LatLog(double lat, double log) {
-            this.lat = lat; this.log = log;
-        }
-    }
     private final ConcurrentHashMap<LatLog, CompletableFuture<String>>
             last30daysViewsCache = new ConcurrentHashMap<>();
 
     public WeatherController(WeatherService api) {
         this.api = api;
+        try {
+            this.root = getSystemResource(".").toURI().getPath();
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public String getSearch(HttpServletRequest req) {
@@ -124,19 +126,22 @@ public class WeatherController {
         return last30days;
     }
 
-    private static String loadLast30daysWeather(double lat, double log) {
-        String path = lat + log + ".html";
-        URL url = ClassLoader.getSystemResource(path);
-        return url == null ? null : load(url);
+    private String loadLast30daysWeather(double lat, double log) {
+        String path = root + lat + "-" + log + ".html";
+        File file = new File(path);
+        URI uri = !file.exists() ? null : file.toURI();
+        return uri == null ? null : load(uri);
     }
 
-    private static String writeLast30daysWeather(double lat, double log, String view) {
-        String path = lat + log + ".html";
-        try(FileWriter fw = new FileWriter(path)) {
-            fw.write(view);
-            fw.flush();
-        } catch (IOException e) {
-            throw new RuntimeException();
+    private String writeLast30daysWeather(double lat, double log, String view) {
+        try {
+            String path = root + lat + "-" + log + ".html";
+            try (FileWriter fw = new FileWriter(path)) {
+                fw.write(view);
+                fw.flush();
+            }
+        }catch (IOException e) {
+            throw new RuntimeException(e);
         }
         return view;
     }
@@ -146,18 +151,52 @@ public class WeatherController {
                 l.getLatitude(), l.getLongitude(), l.getRegion());
     }
 
-    private static String load(String file) {
-        return load(ClassLoader.getSystemResource(file));
+    private static String load(String path) {
+        return load(ClassLoader.getSystemResource(path));
     }
     private static String load(URL url) {
         try {
-            URI uri = url.toURI();
+            return load(url.toURI());
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    private static String load(URI uri) {
+        try {
             Path path = Paths.get(uri);
             return lines(path).collect(Collectors.joining());
-        } catch (URISyntaxException | IOException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
+    private static final class LatLog {
+        final double lat, log;
+        public LatLog(double lat, double log) {
+            this.lat = lat; this.log = log;
+        }
 
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            LatLog latLog = (LatLog) o;
+
+            if (Double.compare(latLog.lat, lat) != 0) return false;
+            return Double.compare(latLog.log, log) == 0;
+
+        }
+
+        @Override
+        public int hashCode() {
+            int result;
+            long temp;
+            temp = Double.doubleToLongBits(lat);
+            result = (int) (temp ^ (temp >>> 32));
+            temp = Double.doubleToLongBits(log);
+            result = 31 * result + (int) (temp ^ (temp >>> 32));
+            return result;
+        }
+    }
 }
